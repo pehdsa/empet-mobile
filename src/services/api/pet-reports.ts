@@ -1,10 +1,21 @@
 import { api } from "./client";
-import type { PetReport, LostReportFilters } from "@/types/pet-report";
+import type {
+  PetReport,
+  LostReportMapFilters,
+  LostReportListFilters,
+} from "@/types/pet-report";
+import type { PaginatedResponse } from "@/types/api";
 
 export const petReportsApi = {
-  /** Lista reports LOST de todos os usuarios (mapa) */
-  listLost: (filters: LostReportFilters) =>
-    api.get<PetReport[]>("/pet-reports/lost", { params: filters }),
+  /** Lista reports LOST para o mapa (sem paginacao, com radius_km) */
+  listLostMap: (filters: LostReportMapFilters) =>
+    api.get<PetReport[]>("/pet-reports/lost/map", { params: filters }),
+
+  /** Lista reports LOST paginada (infinite scroll, com distanceMeters) */
+  listLost: (filters: LostReportListFilters, page: number = 1) =>
+    api.get<PaginatedResponse<PetReport>>("/pet-reports/lost", {
+      params: { ...filters, page },
+    }),
 
   /** Detalhe publico de um report (Fase 7) */
   getDetail: (id: number) =>

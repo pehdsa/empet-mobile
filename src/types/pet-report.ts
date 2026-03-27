@@ -1,5 +1,4 @@
-import type { Pet } from "./pet";
-import type { PetSpecies, PetSize } from "./pet";
+import type { Pet, PetSpecies, PetSize } from "./pet";
 
 export type PetReportStatus = "LOST" | "FOUND" | "CANCELLED";
 
@@ -15,6 +14,7 @@ export interface PetReport {
   isActive: boolean;
   pet: Pet;
   matchesCount: number;
+  distanceMeters?: number;
   createdAt: string;
 }
 
@@ -28,11 +28,19 @@ export interface PetReportFilters {
   page?: number;
 }
 
-/** Filtros para o endpoint /pet-reports/lost (mapa) */
-export interface LostReportFilters {
+/** Filtros para o endpoint /pet-reports/lost/map */
+export interface LostReportMapFilters {
   latitude: number;
   longitude: number;
   radius_km?: number;
+  species?: PetSpecies;
+  size?: PetSize;
+}
+
+/** Filtros para o endpoint /pet-reports/lost (lista paginada) */
+export interface LostReportListFilters {
+  latitude: number;
+  longitude: number;
   species?: PetSpecies;
   size?: PetSize;
 }

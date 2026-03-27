@@ -1,5 +1,8 @@
 import type { PetSpecies } from "@/types/pet";
-import type { LostReportFilters } from "@/types/pet-report";
+import type {
+  LostReportMapFilters,
+  LostReportListFilters,
+} from "@/types/pet-report";
 
 export const queryKeys = {
   auth: {
@@ -13,6 +16,9 @@ export const queryKeys = {
     all: ["characteristics"] as const,
   },
   petReports: {
-    map: (filters: LostReportFilters) => ["petReports", "map", filters] as const,
+    map: (filters: LostReportMapFilters) =>
+      ["petReports", "map", filters] as const,
+    list: (filters: LostReportListFilters) =>
+      ["petReports", "list", filters] as const,
   },
 } as const;
