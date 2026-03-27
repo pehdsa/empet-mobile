@@ -112,7 +112,7 @@ src/                    # Logica da aplicacao (alias @/)
 | 005 | Telas de autenticacao | Pendente |
 | 006 | Home / Mapa | Pendente |
 | 007 | Detalhe do pet report | Pendente |
-| 008 | Pets CRUD | Pendente |
+| 008 | Pets CRUD | Implementado |
 | 009 | Report lost + sighting | Pendente |
 | 010 | Matches | Pendente |
 | 011 | Settings + extras | Pendente |
