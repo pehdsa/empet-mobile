@@ -5,7 +5,11 @@ import {
 } from "@tanstack/react-query";
 import { petReportsApi } from "@/services/api/pet-reports";
 import { queryKeys } from "@/constants/query-keys";
-import type { PetReport, LostReportMapFilters, LostReportListFilters } from "@/types/pet-report";
+import type {
+  PetReport,
+  LostReportMapFilters,
+  LostReportListFilters,
+} from "@/types/pet-report";
 
 /** Hook para reports no mapa (sem paginacao, com radius_km) */
 export function useLostReportsMap(filters: LostReportMapFilters) {
@@ -35,4 +39,14 @@ export function useLostReportsList(filters: LostReportListFilters) {
   const items = query.data?.pages.flatMap((page) => page.data.data) ?? [];
 
   return { ...query, items };
+}
+
+/** Hook para detalhe de um report */
+export function usePetReportDetail(id: number | null) {
+  return useQuery({
+    queryKey: queryKeys.petReports.detail(id!),
+    queryFn: () => petReportsApi.getDetail(id!),
+    enabled: id !== null,
+    select: (r) => r.data.data,
+  });
 }

@@ -20,5 +20,6 @@ export const queryKeys = {
       ["petReports", "map", filters] as const,
     list: (filters: LostReportListFilters) =>
       ["petReports", "list", filters] as const,
+    detail: (id: number) => ["petReports", "detail", id] as const,
   },
 } as const;

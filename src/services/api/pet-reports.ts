@@ -4,7 +4,7 @@ import type {
   LostReportMapFilters,
   LostReportListFilters,
 } from "@/types/pet-report";
-import type { PaginatedResponse } from "@/types/api";
+import type { PaginatedResponse, ResourceResponse } from "@/types/api";
 
 export const petReportsApi = {
   /** Lista reports LOST para o mapa (sem paginacao, com radius_km) */
@@ -19,5 +19,5 @@ export const petReportsApi = {
 
   /** Detalhe publico de um report (Fase 7) */
   getDetail: (id: number) =>
-    api.get<PetReport>(`/pet-reports/${id}/detail`),
+    api.get<ResourceResponse<PetReport>>(`/pet-reports/${id}/detail`),
 };
