@@ -1,4 +1,4 @@
-import { View, ScrollView } from "react-native";
+import { Platform, View, ScrollView, KeyboardAvoidingView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ScreenProps {
@@ -12,18 +12,23 @@ export function Screen({ children, scroll = true, className }: ScreenProps) {
 
   if (scroll) {
     return (
-      <ScrollView
-        className={`flex-1 bg-background ${className ?? ""}`}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingTop: insets.top,
-          paddingBottom: insets.bottom,
-          paddingHorizontal: 24,
-        }}
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {children}
-      </ScrollView>
+        <ScrollView
+          className={`flex-1 bg-background ${className ?? ""}`}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingTop: insets.top,
+            paddingBottom: insets.bottom,
+            paddingHorizontal: 24,
+          }}
+        >
+          {children}
+        </ScrollView>
+      </KeyboardAvoidingView>
     );
   }
 
