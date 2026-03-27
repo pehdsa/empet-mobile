@@ -16,12 +16,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!hasHydrated) return;
 
     const inAuthGroup = segments[0] === "(auth)";
-    const inTabsGroup = segments[0] === "(tabs)";
 
-    if (isAuthenticated && !inTabsGroup) {
-      router.replace("/(tabs)");
-    } else if (!isAuthenticated && !inAuthGroup) {
+    if (!isAuthenticated && !inAuthGroup) {
       router.replace("/(auth)/welcome");
+    } else if (isAuthenticated && inAuthGroup) {
+      router.replace("/(tabs)");
     }
 
     void SplashScreen.hideAsync();
