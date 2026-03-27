@@ -9,7 +9,7 @@ interface MapEmptyStateProps {
 
 export function MapEmptyState({ onAction }: MapEmptyStateProps) {
   return (
-    <View className="mx-4 flex-row items-center gap-3 rounded-2xl bg-surface/85 p-4 shadow-sm">
+    <View className="mx-4 flex-row items-center gap-3 rounded-2xl bg-surface/85 p-4 shadow-soft">
       <View className="h-12 w-12 items-center justify-center rounded-full bg-primary/10">
         <Search size={22} color={colors.primary} />
       </View>

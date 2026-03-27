@@ -35,6 +35,10 @@ export default {
         "montserrat-semibold": ["Montserrat_600SemiBold"],
         "montserrat-bold": ["Montserrat_700Bold"],
       },
+      boxShadow: {
+        soft: "0 2px 8px 0 rgba(0, 0, 0, 0.08)",
+        "soft-lg": "0 4px 16px 0 rgba(0, 0, 0, 0.10)",
+      },
     },
   },
   plugins: [],

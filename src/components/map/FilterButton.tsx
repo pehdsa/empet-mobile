@@ -11,7 +11,7 @@ export function FilterButton({ onPress, hasActiveFilters }: FilterButtonProps) {
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center gap-2 rounded-full bg-surface/85 px-4 py-3 shadow-sm active:opacity-80"
+      className="flex-row items-center gap-2 rounded-full bg-surface/85 px-4 py-3 shadow-soft active:opacity-80"
     >
       <SlidersHorizontal size={18} color={hasActiveFilters ? colors.primary : colors.textPrimary} />
       <Text className={`font-montserrat-medium text-sm ${hasActiveFilters ? "text-primary" : "text-text-primary"}`}>Filtros</Text>

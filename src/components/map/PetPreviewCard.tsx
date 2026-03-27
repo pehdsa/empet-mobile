@@ -28,7 +28,7 @@ export function PetPreviewCard({ report, onPress }: PetPreviewCardProps) {
   return (
     <Pressable
       onPress={onPress}
-      className="mx-4 flex-row items-center gap-3 rounded-2xl bg-surface p-3 shadow-sm active:opacity-80"
+      className="mx-4 flex-row items-center gap-3 rounded-2xl bg-surface p-3 shadow-soft active:opacity-80"
     >
       {/* Foto */}
       {!showPlaceholder ? (
@@ -55,14 +55,8 @@ export function PetPreviewCard({ report, onPress }: PetPreviewCardProps) {
         </Text>
         <Text className="font-montserrat text-sm text-text-secondary" numberOfLines={1}>
           {speciesLabel[pet.species]} · {sizeLabel[pet.size]}
+          {pet.primaryColor ? ` · ${pet.primaryColor}` : ""}
         </Text>
-        {pet.primaryColor && (
-          <View className="self-start rounded-full bg-primary/10 px-2.5 py-0.5">
-            <Text className="font-montserrat-medium text-xs text-primary">
-              {pet.primaryColor}
-            </Text>
-          </View>
-        )}
         {addressHint && (
           <View className="flex-row items-center gap-1">
             <MapPin size={12} color={colors.textTertiary} />
