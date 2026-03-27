@@ -95,7 +95,7 @@ Container padrao para telas:
 - Props: `children`, `scroll` (boolean, default true), `className`
 - Usa `useSafeAreaInsets()` para aplicar padding top/bottom (mais flexivel que `SafeAreaView`)
 - `bg-background`, `px-6` (24px do Pencil)
-- Se `scroll=true`, usa `ScrollView` com:
+- Se `scroll=true`, usa `KeyboardAvoidingView` (iOS: `behavior="padding"`) + `ScrollView` com:
   - `keyboardShouldPersistTaps="handled"`
   - `contentContainerStyle` recebe o padding (nao o wrapper externo)
   - `flex-grow` no contentContainer para permitir centralizar conteudo em telas curtas
@@ -108,6 +108,7 @@ Extraido do Pencil (`Component/ButtonPrimary`, node `JOguz`):
 - Props: `label`, `loading`, `disabled`, `onPress`, `className`
 - Loading: substitui texto por `ActivityIndicator`
 - Disabled: opacity 50%
+- Feedback de toque: `active:opacity-80`
 - Usa `label` (string) nesta fase. Se no futuro precisar de icone + texto, evoluir para `children`
 
 ### ButtonSecondary.tsx
@@ -116,6 +117,7 @@ Extraido do Pencil (`Component/ButtonSecondary`, node `vVdPo`):
 
 - Height 52px, corner radius 14px, bg transparente, border `#AD4FFF` 1.5px, texto `#AD4FFF`
 - Mesmas props que ButtonPrimary
+- Feedback de toque: `active:opacity-80`
 
 > **Decisao:** Dois componentes separados (ButtonPrimary e ButtonSecondary) em vez de um Button com variantes. Reflete o Pencil que tem componentes separados. Manter separados enquanto houver apenas 2 variantes estaveis. Refatorar para `Button` com `variant` apenas se surgir repeticao estrutural forte (3+ variantes com mesma base).
 
@@ -171,6 +173,7 @@ Extraido do Pencil (`Component/SuccessMessage`, node `rTcwF`):
 Extraido do Pencil (`Component/TextLink`, node `jMUvA`):
 
 - Montserrat Medium 14px, cor `#AD4FFF`
+- `active:opacity-60` para feedback visual de toque
 - Props: `label`, `onPress`
 
 ### NavHeader.tsx
