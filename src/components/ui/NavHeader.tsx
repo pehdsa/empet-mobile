@@ -22,7 +22,7 @@ export function NavHeader({ title, onBack, showBack = true, className }: NavHead
   };
 
   return (
-    <View className={`h-[52px] flex-row items-center gap-3 px-6 ${className ?? ""}`}>
+    <View className={`h-[52px] flex-row items-center gap-3 ${className ?? ""}`}>
       {showBack && (
         <Pressable onPress={handleBack} hitSlop={8}>
           <ArrowLeft size={24} color={colors.textPrimary} />
