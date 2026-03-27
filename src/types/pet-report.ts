@@ -27,3 +27,12 @@ export interface PetReportFilters {
   size?: PetSize;
   page?: number;
 }
+
+/** Filtros para o endpoint /pet-reports/lost (mapa) */
+export interface LostReportFilters {
+  latitude: number;
+  longitude: number;
+  radius_km?: number;
+  species?: PetSpecies;
+  size?: PetSize;
+}
