@@ -11,6 +11,7 @@ export function useLocation() {
   const [location, setLocation] = useState<LocationState | null>(null);
   const [permissionStatus, setPermissionStatus] =
     useState<Location.PermissionStatus | null>(null);
+  const [isFallbackLocation, setIsFallbackLocation] = useState(false);
 
   const requestPermission = useCallback(async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -38,8 +39,16 @@ export function useLocation() {
     (async () => {
       const status = await requestPermission();
       if (status === Location.PermissionStatus.GRANTED) {
-        await centerOnUser();
+        const coords = await centerOnUser();
+        if (!coords) {
+          setIsFallbackLocation(true);
+          setLocation({
+            latitude: DEFAULT_LOCATION.latitude,
+            longitude: DEFAULT_LOCATION.longitude,
+          });
+        }
       } else {
+        setIsFallbackLocation(true);
         setLocation({
           latitude: DEFAULT_LOCATION.latitude,
           longitude: DEFAULT_LOCATION.longitude,
@@ -51,6 +60,7 @@ export function useLocation() {
   return {
     location,
     permissionStatus,
+    isFallbackLocation,
     requestPermission,
     centerOnUser,
   };

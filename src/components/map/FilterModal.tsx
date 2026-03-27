@@ -3,7 +3,7 @@ import { BottomSheetModal } from "@/components/ui/BottomSheetModal";
 import { Chip } from "@/components/ui/Chip";
 import { ButtonPrimary } from "@/components/ui/ButtonPrimary";
 import { ButtonSecondary } from "@/components/ui/ButtonSecondary";
-import { useMapFiltersStore } from "@/stores/map-filters.store";
+import { useHomePetReportsStore } from "@/stores/home-pet-reports.store";
 import { speciesLabel, sizeLabel } from "@/constants/enums";
 import type { PetSpecies, PetSize } from "@/types/pet";
 
@@ -30,7 +30,7 @@ const sizeOptions: { value: PetSize | undefined; label: string }[] = [
 
 export function FilterModal({ visible, onClose }: FilterModalProps) {
   const { species, size, setSpecies, setSize, resetFilters } =
-    useMapFiltersStore();
+    useHomePetReportsStore();
 
   return (
     <BottomSheetModal visible={visible} onClose={onClose} title="Filtros">

@@ -1,6 +1,6 @@
 import { ScrollView } from "react-native";
 import { Chip } from "@/components/ui/Chip";
-import { useMapFiltersStore } from "@/stores/map-filters.store";
+import { useHomePetReportsStore } from "@/stores/home-pet-reports.store";
 import { speciesLabel, sizeLabel } from "@/constants/enums";
 import type { PetSpecies, PetSize } from "@/types/pet";
 
@@ -21,7 +21,7 @@ const sizeOptions: { value: PetSize | undefined; label: string }[] = [
 ];
 
 export function FilterBar() {
-  const { species, size, setSpecies, setSize } = useMapFiltersStore();
+  const { species, size, setSpecies, setSize } = useHomePetReportsStore();
 
   return (
     <ScrollView
