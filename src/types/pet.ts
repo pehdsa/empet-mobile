@@ -26,3 +26,13 @@ export interface PetPhoto {
   url: string;
   position: number;
 }
+
+/** Estado de uma foto no formulario (misto: existente do backend + nova local) */
+export interface PhotoFormItem {
+  /** ID estavel para render key: "existing-{id}" ou "local-{uri}" */
+  id: string;
+  /** Foto existente do backend */
+  existing?: PetPhoto;
+  /** Nova foto escolhida localmente (ImagePicker asset) */
+  local?: { uri: string; mimeType: string; fileName: string };
+}

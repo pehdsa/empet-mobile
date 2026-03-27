@@ -15,6 +15,11 @@ export const queryKeys = {
   characteristics: {
     all: ["characteristics"] as const,
   },
+  pets: {
+    all: ["pets"] as const,
+    list: () => ["pets", "list"] as const,
+    detail: (id: number) => ["pets", "detail", id] as const,
+  },
   petReports: {
     map: (filters: LostReportMapFilters) =>
       ["petReports", "map", filters] as const,
