@@ -38,13 +38,13 @@ npx expo install <pkg> # Deps com binding nativo (garante compatibilidade com SD
 ## Estrutura
 
 ```
-app/                    # Expo Router (file-based routing)
-  _layout.tsx           # Root: fonts → AppProviders → AuthProvider → Slot
-  index.tsx             # Redirect baseado em auth state
-  (auth)/               # Grupo publico (Stack)
-  (tabs)/               # Grupo autenticado (Tabs: Home + Config)
-
 src/                    # Logica da aplicacao (alias @/)
+  app/                  # Expo Router (file-based routing)
+    _layout.tsx         # Root: fonts → AppProviders → AuthProvider → Slot
+    index.tsx           # Redirect baseado em auth state
+    (auth)/             # Grupo publico (Stack)
+    (tabs)/             # Grupo autenticado (Tabs: Home + Config)
+  assets/               # Icones, splash, imagens estaticas
   types/                # Um arquivo por entidade (unions reutilizaveis)
   services/api/         # client.ts (Axios + interceptors) + modulos por dominio
   services/storage/     # Wrapper generico do SecureStore
