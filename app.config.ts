@@ -8,9 +8,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version: "1.0.0",
   orientation: "portrait",
   userInterfaceStyle: "automatic",
-  icon: "./assets/icon.png",
+  icon: "./src/assets/icon.png",
   splash: {
-    image: "./assets/splash-icon.png",
+    image: "./src/assets/splash-icon.png",
     resizeMode: "contain",
     backgroundColor: "#AD4FFF",
   },
@@ -20,7 +20,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: "./assets/adaptive-icon.png",
+      foregroundImage: "./src/assets/adaptive-icon.png",
       backgroundColor: "#AD4FFF",
     },
     package: "com.empet.app",
