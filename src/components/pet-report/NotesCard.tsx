@@ -12,7 +12,7 @@ export function NotesCard({ notes }: NotesCardProps) {
       <View className="flex-row items-center gap-2">
         <Info size={16} color={colors.secondary} />
         <Text className="font-montserrat-bold text-base text-text-primary">
-          Observacoes do dono
+          Observações do dono
         </Text>
       </View>
       <Text className="font-montserrat text-sm leading-5 text-text-secondary">

@@ -23,6 +23,7 @@ npx expo install <pkg> # Deps com binding nativo (garante compatibilidade com SD
 - Hooks e modulos de API de dominio nascem junto com a feature, nao antecipadamente
 - Base path da API (`/api/v1`) definido uma vez no client Axios — nunca hardcodar em multiplos lugares
 - Labels de UI vivem em `enums.ts` como `Record<UnionType, string>` — nunca `Record<string, string>`
+- Textos de UI (labels, placeholders, mensagens de erro, toasts) devem sempre usar acentuacao correta do portugues (ex: "Observações", "Características", "obrigatório", "inválido")
 
 ## Naming
 

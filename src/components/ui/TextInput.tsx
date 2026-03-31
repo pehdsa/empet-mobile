@@ -24,7 +24,7 @@ export const TextInput = React.forwardRef<RNTextInput, TextInputProps>(
         <RNTextInput
           ref={ref}
           placeholderTextColor={colors.textTertiary}
-          className={`h-12 rounded-xl border bg-surface px-4 font-montserrat text-[15px] text-text-primary ${
+          className={`${props.multiline ? "min-h-[128px] py-3" : "h-12"} rounded-xl border bg-surface px-4 font-montserrat text-[15px] text-text-primary ${
             error ? "border-error" : "border-border"
           }`}
           {...props}

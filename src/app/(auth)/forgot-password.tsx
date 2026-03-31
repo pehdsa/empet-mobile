@@ -65,7 +65,7 @@ export default function ForgotPassword() {
 
       <View className="flex-1 justify-center gap-4">
         <Text className="font-montserrat text-sm text-text-secondary">
-          Informe seu email para receber um codigo de verificacao.
+          Informe seu email para receber um código de verificação.
         </Text>
 
         <Controller
@@ -94,7 +94,7 @@ export default function ForgotPassword() {
         {formError && <ErrorMessage message={formError} />}
 
         <ButtonPrimary
-          label="Enviar codigo"
+          label="Enviar código"
           onPress={handleSubmit(onSubmit)}
           loading={forgotPassword.isPending}
           disabled={forgotPassword.isPending}

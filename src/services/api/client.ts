@@ -21,6 +21,10 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  if (config.data instanceof FormData) {
+    config.headers.set("Content-Type", undefined);
+    config.transformRequest = [(data: unknown) => data];
+  }
   return config;
 });
 

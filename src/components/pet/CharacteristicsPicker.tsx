@@ -41,7 +41,7 @@ export function CharacteristicsPicker({
   return (
     <View className="gap-4">
       <Text className="font-montserrat-bold text-base text-text-primary">
-        Caracteristicas
+        Características
       </Text>
 
       {grouped.map(({ category, items }) => (

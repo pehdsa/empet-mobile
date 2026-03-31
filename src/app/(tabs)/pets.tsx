@@ -30,8 +30,7 @@ export default function PetsScreen() {
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-      <NavHeader title="Meus Pets" />
-
+      <NavHeader title="Meus Pets" showBack={false} className="px-6" />
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={colors.primary} />
@@ -55,6 +54,7 @@ export default function PetsScreen() {
             description="Cadastre seus pets para poder reportar caso eles se percam"
             actionLabel="Cadastrar Pet"
             onAction={handleCreate}
+            actionVariant="button"
           />
         </View>
       ) : (

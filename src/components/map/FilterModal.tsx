@@ -1,8 +1,7 @@
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { BottomSheetModal } from "@/components/ui/BottomSheetModal";
 import { Chip } from "@/components/ui/Chip";
 import { ButtonPrimary } from "@/components/ui/ButtonPrimary";
-import { ButtonSecondary } from "@/components/ui/ButtonSecondary";
 import { useHomePetReportsStore } from "@/stores/home-pet-reports.store";
 import { speciesLabel, sizeLabel } from "@/constants/enums";
 import type { PetSpecies, PetSize } from "@/types/pet";
@@ -36,7 +35,7 @@ export function FilterModal({ visible, onClose }: FilterModalProps) {
     <BottomSheetModal visible={visible} onClose={onClose} title="Filtros">
       {/* Espécie */}
       <Text className="mb-3 font-montserrat-semibold text-sm text-text-primary">
-        Especie
+        Espécie
       </Text>
       <View className="mb-6 flex-row gap-2">
         {speciesOptions.map((opt) => (
@@ -65,13 +64,13 @@ export function FilterModal({ visible, onClose }: FilterModalProps) {
       </View>
 
       {/* Actions */}
-      <View className="flex-row gap-3">
-        <View className="flex-1">
-          <ButtonSecondary label="Limpar" onPress={resetFilters} />
-        </View>
-        <View className="flex-1">
-          <ButtonPrimary label="Aplicar" onPress={onClose} />
-        </View>
+      <View className="gap-3">
+        <ButtonPrimary label="Aplicar" onPress={onClose} />
+        <Pressable onPress={resetFilters} className="items-center py-1 active:opacity-60">
+          <Text className="font-montserrat-medium text-sm text-text-secondary">
+            Limpar
+          </Text>
+        </Pressable>
       </View>
     </BottomSheetModal>
   );

@@ -31,7 +31,7 @@ export default function PetReportDetail() {
     return (
       <View className="flex-1 items-center justify-center bg-background">
         <Text className="font-montserrat text-sm text-text-secondary">
-          Report invalido
+          Report inválido
         </Text>
       </View>
     );
@@ -57,7 +57,7 @@ export default function PetReportDetail() {
             Erro ao carregar
           </Text>
           <Text className="text-center font-montserrat text-sm text-text-secondary">
-            Nao foi possivel carregar os detalhes do report.
+            Não foi possível carregar os detalhes do report.
           </Text>
           <Pressable
             onPress={() => refetch()}

@@ -42,7 +42,7 @@ export function CharacteristicsSection({
 
       {/* Title */}
       <Text className="font-montserrat-bold text-base text-text-primary">
-        Caracteristicas
+        Características
       </Text>
 
       {/* Category rows */}

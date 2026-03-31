@@ -10,14 +10,14 @@ export const speciesLabel: Record<PetSpecies, string> = {
 
 export const sizeLabel: Record<PetSize, string> = {
   SMALL: "Pequeno",
-  MEDIUM: "Medio",
+  MEDIUM: "Médio",
   LARGE: "Grande",
 };
 
 export const sexLabel: Record<PetSex, string> = {
   MALE: "Macho",
-  FEMALE: "Femea",
-  UNKNOWN: "Nao informado",
+  FEMALE: "Fêmea",
+  UNKNOWN: "Não informado",
 };
 
 export const reportStatusLabel: Record<PetReportStatus, string> = {
@@ -30,7 +30,7 @@ export const characteristicCategoryLabel: Record<CharacteristicCategory, string>
   MARKING: "Marcas",
   COAT: "Pelagem",
   BEHAVIOR: "Comportamento",
-  IDENTIFICATION: "Identificacao",
+  IDENTIFICATION: "Identificação",
 };
 
 export const matchStatusLabel: Record<MatchStatus, string> = {

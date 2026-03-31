@@ -11,7 +11,7 @@ export function ToggleButton({ label, active, onPress, className }: ToggleButton
   return (
     <Pressable
       onPress={onPress}
-      className={`h-10 items-center justify-center rounded-xl px-5 ${
+      className={`h-9 items-center justify-center rounded-full px-4 ${
         active ? "bg-primary" : "border border-border bg-surface"
       } ${className ?? ""}`}
     >

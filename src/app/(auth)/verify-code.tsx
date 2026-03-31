@@ -76,7 +76,7 @@ export default function VerifyCode() {
         } else if (status === 429) {
           toast.show("Muitas tentativas, tente novamente", "error");
         } else {
-          setFormError("Codigo invalido ou expirado");
+          setFormError("Código inválido ou expirado");
         }
       },
     });
@@ -86,11 +86,11 @@ export default function VerifyCode() {
 
   return (
     <Screen>
-      <NavHeader title="Verificar codigo" />
+      <NavHeader title="Verificar código" />
 
       <View className="flex-1 justify-center gap-4">
         <Text className="font-montserrat text-sm text-text-secondary">
-          Insira o codigo de 6 digitos enviado para {email}.
+          Insira o código de 6 dígitos enviado para {email}.
         </Text>
 
         <Controller
