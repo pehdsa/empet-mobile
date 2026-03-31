@@ -15,6 +15,7 @@ export interface Pet {
   breedDescription: string | null;
   notes: string | null;
   isActive: boolean;
+  activeReportId: number | null;
   breed: Breed | null;
   secondaryBreed: Breed | null;
   photos: PetPhoto[];

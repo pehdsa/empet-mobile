@@ -25,7 +25,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     package: "com.empet.app",
   },
-  plugins: ["expo-router", "expo-secure-store", "expo-font", "expo-splash-screen"],
+  plugins: [
+    "expo-router",
+    "expo-secure-store",
+    "expo-font",
+    "expo-splash-screen",
+    "@react-native-community/datetimepicker",
+  ],
   experiments: {
     typedRoutes: true,
   },
