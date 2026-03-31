@@ -32,6 +32,8 @@ export function PetForm({ form, mode }: PetFormProps) {
 
   const [breedModalVisible, setBreedModalVisible] = useState(false);
   const [breed2ModalVisible, setBreed2ModalVisible] = useState(false);
+  const [breedSearch, setBreedSearch] = useState("");
+  const [breed2Search, setBreed2Search] = useState("");
 
   // Reset breeds quando species muda
   useEffect(() => {
@@ -88,7 +90,7 @@ export function PetForm({ form, mode }: PetFormProps) {
         render={({ field: { value, onChange }, fieldState: { error } }) => (
           <View className="gap-2">
             <Text className="font-montserrat-medium text-[13px] text-text-secondary">
-              Especie
+              Espécie
             </Text>
             <View className="flex-row gap-2">
               {SPECIES_OPTIONS.map((sp) => (
@@ -166,16 +168,19 @@ export function PetForm({ form, mode }: PetFormProps) {
         render={({ fieldState: { error } }) => (
           <>
             <SelectField
-              label="Raca"
+              label="Raça"
               value={selectedBreedName}
-              placeholder="Selecionar raca"
+              placeholder="Selecionar raça"
               error={error?.message}
               onPress={() => setBreedModalVisible(true)}
             />
             <BottomSheetModal
               visible={breedModalVisible}
               onClose={() => setBreedModalVisible(false)}
-              title="Selecionar raca"
+              title="Selecionar raça"
+              searchable
+              searchPlaceholder="Buscar raça..."
+              onSearchChange={setBreedSearch}
             >
               <ScrollView className="max-h-72">
                 <Pressable
@@ -189,26 +194,30 @@ export function PetForm({ form, mode }: PetFormProps) {
                     Nenhuma
                   </RNText>
                 </Pressable>
-                {breeds?.map((breed) => (
-                  <Pressable
-                    key={breed.id}
-                    onPress={() => {
-                      setValue("breedId", breed.id);
-                      setBreedModalVisible(false);
-                    }}
-                    className="border-b border-border px-2 py-3 active:opacity-60"
-                  >
-                    <RNText
-                      className={`font-montserrat text-[15px] ${
-                        breed.id === watchedBreedId
-                          ? "font-montserrat-medium text-primary"
-                          : "text-text-primary"
-                      }`}
+                {breeds
+                  ?.filter((b) =>
+                    b.name.toLowerCase().includes(breedSearch.toLowerCase()),
+                  )
+                  .map((breed) => (
+                    <Pressable
+                      key={breed.id}
+                      onPress={() => {
+                        setValue("breedId", breed.id);
+                        setBreedModalVisible(false);
+                      }}
+                      className="border-b border-border px-2 py-3 active:opacity-60"
                     >
-                      {breed.name}
-                    </RNText>
-                  </Pressable>
-                ))}
+                      <RNText
+                        className={`font-montserrat text-[15px] ${
+                          breed.id === watchedBreedId
+                            ? "font-montserrat-medium text-primary"
+                            : "text-text-primary"
+                        }`}
+                      >
+                        {breed.name}
+                      </RNText>
+                    </Pressable>
+                  ))}
               </ScrollView>
             </BottomSheetModal>
           </>
@@ -222,9 +231,9 @@ export function PetForm({ form, mode }: PetFormProps) {
         render={({ fieldState: { error } }) => (
           <>
             <SelectField
-              label="Raca secundaria (opcional)"
+              label="Raça secundária (opcional)"
               value={selectedBreed2Name}
-              placeholder="Selecionar raca"
+              placeholder="Selecionar raça"
               error={error?.message}
               onPress={
                 watchedBreedId !== null
@@ -236,7 +245,10 @@ export function PetForm({ form, mode }: PetFormProps) {
             <BottomSheetModal
               visible={breed2ModalVisible}
               onClose={() => setBreed2ModalVisible(false)}
-              title="Raca secundaria"
+              title="Raça secundária"
+              searchable
+              searchPlaceholder="Buscar raça..."
+              onSearchChange={setBreed2Search}
             >
               <ScrollView className="max-h-72">
                 <Pressable
@@ -251,7 +263,11 @@ export function PetForm({ form, mode }: PetFormProps) {
                   </RNText>
                 </Pressable>
                 {breeds
-                  ?.filter((b) => b.id !== watchedBreedId)
+                  ?.filter(
+                    (b) =>
+                      b.id !== watchedBreedId &&
+                      b.name.toLowerCase().includes(breed2Search.toLowerCase()),
+                  )
                   .map((breed) => (
                     <Pressable
                       key={breed.id}
@@ -301,7 +317,7 @@ export function PetForm({ form, mode }: PetFormProps) {
         render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
           <View className="gap-1.5">
             <Text className="font-montserrat-medium text-[13px] text-text-secondary">
-              Observacoes (opcional)
+              Observações (opcional)
             </Text>
             <TextInput
               placeholder="Detalhes sobre o pet..."
@@ -312,7 +328,6 @@ export function PetForm({ form, mode }: PetFormProps) {
               multiline
               numberOfLines={4}
               textAlignVertical="top"
-              className="!h-24"
             />
             <Text className="self-end font-montserrat text-[11px] text-text-tertiary">
               {value.length}/1000
