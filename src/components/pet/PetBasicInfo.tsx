@@ -22,26 +22,32 @@ export function PetBasicInfo({ pet }: PetBasicInfoProps) {
 
   return (
     <View className="gap-3 rounded-t-2xl bg-surface px-6 py-6">
-      {/* Nome + badge ativo/inativo */}
+      {/* Nome + badge seguro/perdido */}
       <View className="flex-row items-center justify-between">
         <Text className="flex-1 font-montserrat-bold text-[22px] text-text-primary">
           {pet.name}
         </Text>
-        <View
-          className="ml-2 rounded-full px-2.5 py-1"
-          style={{
-            backgroundColor: pet.isActive ? "#43A04720" : "#9B9C9D20",
-          }}
-        >
-          <Text
-            className="font-montserrat-medium text-xs"
-            style={{
-              color: pet.isActive ? colors.success : colors.textTertiary,
-            }}
+        {pet.activeReportId ? (
+          <View
+            className="ml-2 flex-row items-center gap-1.5 rounded-lg px-2.5 py-[3px]"
+            style={{ backgroundColor: "#E5393515" }}
           >
-            {pet.isActive ? "Ativo" : "Inativo"}
-          </Text>
-        </View>
+            <View className="h-2 w-2 rounded-full" style={{ backgroundColor: "#E53935" }} />
+            <Text className="font-montserrat-semibold text-xs" style={{ color: "#E53935" }}>
+              Perdido
+            </Text>
+          </View>
+        ) : (
+          <View
+            className="ml-2 flex-row items-center gap-1.5 rounded-xl px-3 py-1"
+            style={{ backgroundColor: "#43A04715" }}
+          >
+            <View className="h-2 w-2 rounded-full" style={{ backgroundColor: "#43A047" }} />
+            <Text className="font-montserrat-semibold text-xs" style={{ color: "#43A047" }}>
+              Seguro
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* Badges */}
@@ -68,7 +74,7 @@ export function PetBasicInfo({ pet }: PetBasicInfoProps) {
       {breedLine ? (
         <Text className="font-montserrat text-sm text-text-secondary">{breedLine}</Text>
       ) : (
-        <Text className="font-montserrat text-sm text-text-tertiary">Sem raca definida</Text>
+        <Text className="font-montserrat text-sm text-text-tertiary">Sem raça definida</Text>
       )}
 
       {/* Descricao de raca */}

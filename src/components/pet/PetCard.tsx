@@ -19,7 +19,7 @@ export function PetCard({ pet, onPress }: PetCardProps) {
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center gap-3 rounded-2xl border border-border bg-surface p-3 active:opacity-80"
+      className="flex-row items-center gap-3 rounded-2xl bg-white p-3 shadow-soft active:opacity-80"
     >
       {/* Foto */}
       {!showPlaceholder ? (
@@ -39,17 +39,26 @@ export function PetCard({ pet, onPress }: PetCardProps) {
       <View className="flex-1 gap-0.5">
         <View className="flex-row items-center gap-2">
           <Text
-            className="font-montserrat-bold text-base text-text-primary"
+            className="flex-1 font-montserrat-bold text-base text-text-primary"
             numberOfLines={1}
           >
             {pet.name}
           </Text>
-          <View
-            className="h-2 w-2 rounded-full"
-            style={{
-              backgroundColor: pet.isActive ? colors.success : colors.textTertiary,
-            }}
-          />
+          {pet.activeReportId ? (
+            <View className="flex-row items-center gap-1.5 rounded-lg px-2.5 py-[3px]" style={{ backgroundColor: "#E5393515" }}>
+              <View className="h-2 w-2 rounded-full" style={{ backgroundColor: "#E53935" }} />
+              <Text className="font-montserrat-semibold text-xs" style={{ color: "#E53935" }}>
+                Perdido
+              </Text>
+            </View>
+          ) : (
+            <View className="flex-row items-center gap-1.5 rounded-xl px-3 py-1" style={{ backgroundColor: "#43A04715" }}>
+              <View className="h-2 w-2 rounded-full" style={{ backgroundColor: "#43A047" }} />
+              <Text className="font-montserrat-semibold text-xs" style={{ color: "#43A047" }}>
+                Seguro
+              </Text>
+            </View>
+          )}
         </View>
         <Text className="font-montserrat text-[13px] text-text-secondary" numberOfLines={1}>
           {speciesLabel[pet.species]} · {sizeLabel[pet.size]}

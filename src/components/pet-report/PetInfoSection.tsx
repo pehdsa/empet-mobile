@@ -37,11 +37,15 @@ export function PetInfoSection({ pet, status }: PetInfoSectionProps) {
           {pet.name}
         </Text>
         <View
-          className="ml-2 rounded-full px-2.5 py-1"
+          className="ml-2 flex-row items-center gap-1.5 rounded-lg px-2.5 py-[3px]"
           style={{ backgroundColor: statusColor.bg }}
         >
+          <View
+            className="h-2 w-2 rounded-full"
+            style={{ backgroundColor: statusColor.text }}
+          />
           <Text
-            className="font-montserrat-medium text-xs"
+            className="font-montserrat-semibold text-xs"
             style={{ color: statusColor.text }}
           >
             {reportStatusLabel[status]}

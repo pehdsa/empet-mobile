@@ -1,4 +1,4 @@
-import { View, FlatList, ActivityIndicator, RefreshControl } from "react-native";
+import { View, Text, FlatList, ActivityIndicator, RefreshControl } from "react-native";
 import { colors } from "@/lib/colors";
 import { PetListCard } from "./PetListCard";
 import { MapEmptyState } from "@/components/map/MapEmptyState";
@@ -56,6 +56,11 @@ export function PetList({
       data={items}
       keyExtractor={(item) => String(item.id)}
       renderItem={({ item }) => <PetListCard report={item} />}
+      ListHeaderComponent={
+        <Text className="font-montserrat-bold text-lg text-text-primary">
+          Pets perdidos
+        </Text>
+      }
       contentContainerStyle={{
         paddingTop: contentTopInset,
         paddingHorizontal: 16,

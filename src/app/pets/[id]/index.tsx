@@ -2,15 +2,22 @@ import { useState } from "react";
 import { View, ScrollView, ActivityIndicator, Text, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Pencil, Trash2, TriangleAlert } from "lucide-react-native";
+import {
+  Pencil,
+  Trash2,
+  TriangleAlert,
+  FileText,
+  Users,
+  ChevronRight,
+  CircleCheck,
+} from "lucide-react-native";
 
 import { colors } from "@/lib/colors";
-import { usePet, useTogglePetActive, useDeletePet } from "@/hooks/usePets";
+import { usePet, useDeletePet } from "@/hooks/usePets";
+import { usePetReportDetail, useMarkPetFound } from "@/hooks/usePetReports";
 import { useToastStore } from "@/stores/toast";
 import { NavHeader } from "@/components/ui/NavHeader";
-import { Modal } from "@/components/ui/Modal";
-import { ButtonPrimary } from "@/components/ui/ButtonPrimary";
-import { ButtonSecondary } from "@/components/ui/ButtonSecondary";
+import { Dialog } from "@/components/ui/Dialog";
 import { PhotoCarousel } from "@/components/pet-report/PhotoCarousel";
 import { CharacteristicsSection } from "@/components/pet-report/CharacteristicsSection";
 import { NotesCard } from "@/components/pet-report/NotesCard";
@@ -30,39 +37,54 @@ export default function PetDetailScreen() {
 
   const parsedId = parseId(rawId);
   const { data: pet, isLoading, isError, refetch } = usePet(parsedId);
-  const toggleActive = useTogglePetActive();
   const deletePet = useDeletePet();
+  const markFound = useMarkPetFound();
+
+  const isLost = !!pet?.activeReportId;
+  const { data: activeReport } = usePetReportDetail(
+    pet?.activeReportId ?? null,
+  );
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [foundModalVisible, setFoundModalVisible] = useState(false);
 
   if (parsedId === null) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
         <Text className="font-montserrat text-sm text-text-secondary">
-          Pet invalido
+          Pet inválido
         </Text>
       </View>
     );
   }
 
-  const handleToggleActive = () => {
-    if (toggleActive.isPending) return;
-    toggleActive.mutate(parsedId, {
-      onError: () => showToast("Erro ao alterar status", "error"),
-    });
-  };
-
   const handleDelete = () => {
     deletePet.mutate(parsedId, {
       onSuccess: () => {
         setDeleteModalVisible(false);
-        showToast("Pet excluido com sucesso");
+        showToast("Pet excluído com sucesso");
         router.replace("/(tabs)/pets" as never);
       },
       onError: () => {
         showToast("Erro ao excluir pet", "error");
       },
     });
+  };
+
+  const handleMarkFound = () => {
+    if (!pet?.activeReportId) return;
+    markFound.mutate(
+      { reportId: pet.activeReportId, petId: parsedId },
+      {
+        onSuccess: () => {
+          setFoundModalVisible(false);
+          showToast("Pet marcado como encontrado!");
+        },
+        onError: () => {
+          showToast("Erro ao marcar como encontrado", "error");
+        },
+      },
+    );
   };
 
   return (
@@ -96,6 +118,22 @@ export default function PetDetailScreen() {
         <>
           <ScrollView>
             <PhotoCarousel photos={pet.photos} species={pet.species} />
+
+            {/* Botao Pet encontrado (estado perdido) */}
+            {isLost && (
+              <View className="items-center px-0 py-3">
+                <Pressable
+                  onPress={() => setFoundModalVisible(true)}
+                  className="h-[52px] flex-row items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-success px-5 active:opacity-80"
+                >
+                  <CircleCheck size={20} color="#43A047" />
+                  <Text className="font-montserrat-bold text-base" style={{ color: "#43A047" }}>
+                    Pet encontrado
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+
             <PetBasicInfo pet={pet} />
 
             {pet.characteristics.length > 0 && (
@@ -112,48 +150,93 @@ export default function PetDetailScreen() {
             <View className="h-4" />
           </ScrollView>
 
+          {/* Card Ver Matches (estado perdido, fixo entre scroll e bottom bar, oculto se 0 matches) */}
+          {isLost && (activeReport?.matchesCount ?? 0) > 0 && (
+            <Pressable
+              onPress={() => showToast("Em breve")}
+              className="flex-row items-center gap-3 border-t border-border px-6 py-3"
+              style={{ backgroundColor: "#AD4FFF10" }}
+            >
+              <View className="h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: "#AD4FFF15" }}>
+                <Users size={20} color={colors.primary} />
+              </View>
+              <View className="flex-1 gap-0.5">
+                <Text className="font-montserrat-semibold text-[15px] text-text-primary">
+                  Ver Matches
+                </Text>
+                <Text className="font-montserrat text-xs text-text-secondary">
+                  {activeReport?.matchesCount ?? 0} pets encontrados com similaridade
+                </Text>
+              </View>
+              <ChevronRight size={20} color={colors.textTertiary} />
+            </Pressable>
+          )}
+
           {/* Bottom bar */}
           <View
-            className="flex-row items-center gap-3 border-t border-border bg-surface px-6 py-3"
+            className="gap-3 border-t border-border bg-surface px-6 py-3"
             style={{ paddingBottom: 12 + insets.bottom }}
           >
-            {/* Toggle active */}
-            <Pressable
-              onPress={handleToggleActive}
-              disabled={toggleActive.isPending}
-              className={`h-[52px] flex-1 items-center justify-center rounded-[14px] ${
-                pet.isActive ? "bg-error" : "bg-success"
-              } active:opacity-80 ${toggleActive.isPending ? "opacity-50" : ""}`}
-            >
-              <Text className="font-montserrat-medium text-base text-text-inverse">
-                {pet.isActive ? "Desativar" : "Ativar"}
-              </Text>
-            </Pressable>
+            <View className="flex-row items-center gap-3">
+              {isLost ? (
+                /* Estado perdido: botao outline "Detalhes de Perda" */
+                <Pressable
+                  onPress={() =>
+                    router.push({
+                      pathname: "/report-lost/update/[reportId]" as never,
+                      params: { reportId: String(pet.activeReportId) },
+                    })
+                  }
+                  className="h-[52px] w-[216px] flex-row items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-primary active:opacity-80"
+                >
+                  <FileText size={20} color={colors.primary} />
+                  <Text className="font-montserrat-semibold text-base text-primary">
+                    Detalhes de Perda
+                  </Text>
+                </Pressable>
+              ) : (
+                /* Estado seguro: botao "Pet Perdido" */
+                <Pressable
+                  onPress={() =>
+                    router.push({
+                      pathname: "/report-lost/[petId]" as never,
+                      params: { petId: String(parsedId) },
+                    })
+                  }
+                  className="h-[52px] w-[216px] flex-row items-center justify-center gap-2 rounded-[14px] bg-error active:opacity-80"
+                >
+                  <TriangleAlert size={20} color="#FFFFFF" />
+                  <Text className="font-montserrat-semibold text-base text-text-inverse">
+                    Pet Perdido
+                  </Text>
+                </Pressable>
+              )}
 
-            {/* Edit */}
-            <Pressable
-              onPress={() =>
-                router.push({
-                  pathname: "/pets/[id]/edit",
-                  params: { id: String(parsedId) },
-                })
-              }
-              className="h-[52px] w-[52px] items-center justify-center rounded-xl border border-primary active:opacity-80"
-            >
-              <Pencil size={20} color={colors.primary} />
-            </Pressable>
+              {/* Edit */}
+              <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: "/pets/[id]/edit",
+                    params: { id: String(parsedId) },
+                  })
+                }
+                className="h-[52px] w-[52px] items-center justify-center rounded-xl border-[1.5px] border-primary active:opacity-80"
+              >
+                <Pencil size={20} color={colors.primary} />
+              </Pressable>
 
-            {/* Delete */}
-            <Pressable
-              onPress={() => setDeleteModalVisible(true)}
-              className="h-[52px] w-[52px] items-center justify-center rounded-xl border border-error active:opacity-80"
-            >
-              <Trash2 size={20} color={colors.error} />
-            </Pressable>
+              {/* Delete */}
+              <Pressable
+                onPress={() => setDeleteModalVisible(true)}
+                className="h-[52px] w-[52px] items-center justify-center rounded-xl border-[1.5px] border-error active:opacity-80"
+              >
+                <Trash2 size={20} color={colors.error} />
+              </Pressable>
+            </View>
           </View>
 
           {/* Delete modal */}
-          <Modal
+          <Dialog
             visible={deleteModalVisible}
             onClose={() => setDeleteModalVisible(false)}
           >
@@ -167,19 +250,15 @@ export default function PetDetailScreen() {
               </Text>
 
               <Text className="text-center font-montserrat text-sm leading-5 text-text-secondary">
-                Tem certeza que deseja excluir {pet.name}? Essa acao nao pode ser
+                Tem certeza que deseja excluir {pet.name}? Essa ação não pode ser
                 desfeita.
               </Text>
 
-              <View className="w-full gap-3">
-                <ButtonSecondary
-                  label="Cancelar"
-                  onPress={() => setDeleteModalVisible(false)}
-                />
+              <View className="w-full items-center gap-3">
                 <Pressable
                   onPress={handleDelete}
                   disabled={deletePet.isPending}
-                  className={`h-[52px] items-center justify-center rounded-[14px] bg-error active:opacity-80 ${
+                  className={`w-full h-[52px] items-center justify-center rounded-[14px] bg-error active:opacity-80 ${
                     deletePet.isPending ? "opacity-50" : ""
                   }`}
                 >
@@ -187,9 +266,65 @@ export default function PetDetailScreen() {
                     {deletePet.isPending ? "Excluindo..." : "Excluir"}
                   </Text>
                 </Pressable>
+                <Pressable
+                  onPress={() => setDeleteModalVisible(false)}
+                  className="py-1 active:opacity-60"
+                >
+                  <Text className="font-montserrat-medium text-sm text-text-secondary">
+                    Cancelar
+                  </Text>
+                </Pressable>
               </View>
             </View>
-          </Modal>
+          </Dialog>
+
+          {/* Found confirmation modal */}
+          <Dialog
+            visible={foundModalVisible}
+            onClose={() => setFoundModalVisible(false)}
+          >
+            <View className="items-center gap-4">
+              <View
+                className="h-14 w-14 items-center justify-center rounded-full"
+                style={{ backgroundColor: "#43A04720" }}
+              >
+                <CircleCheck size={28} color="#43A047" />
+              </View>
+
+              <Text className="font-montserrat-bold text-xl text-text-primary">
+                Pet encontrado?
+              </Text>
+
+              <Text className="text-center font-montserrat text-sm leading-5 text-text-secondary">
+                Tem certeza que o pet foi encontrado? O status será atualizado e
+                o alerta será encerrado.
+              </Text>
+
+              <View className="w-full items-center gap-3">
+                <Pressable
+                  onPress={handleMarkFound}
+                  disabled={markFound.isPending}
+                  className="w-full h-[52px] items-center justify-center rounded-[14px] active:opacity-80"
+                  style={{
+                    backgroundColor: "#43A047",
+                    opacity: markFound.isPending ? 0.5 : 1,
+                  }}
+                >
+                  <Text className="font-montserrat-medium text-base text-text-inverse">
+                    {markFound.isPending ? "Atualizando..." : "Sim, encontrado!"}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => setFoundModalVisible(false)}
+                  className="py-1 active:opacity-60"
+                >
+                  <Text className="font-montserrat-medium text-[13px] text-text-tertiary">
+                    Cancelar
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </Dialog>
         </>
       )}
     </View>
