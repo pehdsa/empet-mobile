@@ -7,6 +7,7 @@ import type {
   PetSightingMapFilters,
   PetSightingListFilters,
 } from "@/types/pet-sighting";
+import type { MatchStatus } from "@/types/match";
 
 export const queryKeys = {
   auth: {
@@ -45,5 +46,9 @@ export const queryKeys = {
     list: (filters: PetSightingListFilters) =>
       ["petSightings", "list", filters] as const,
     detail: (id: number) => ["petSightings", "detail", id] as const,
+  },
+  matches: {
+    byReport: (reportId: number, status?: MatchStatus) =>
+      ["matches", "byReport", reportId, status] as const,
   },
 } as const;
