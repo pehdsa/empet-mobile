@@ -3,6 +3,10 @@ import type {
   LostReportMapFilters,
   LostReportListFilters,
 } from "@/types/pet-report";
+import type {
+  PetSightingMapFilters,
+  PetSightingListFilters,
+} from "@/types/pet-sighting";
 
 export const queryKeys = {
   auth: {
@@ -33,5 +37,13 @@ export const queryKeys = {
   sightings: {
     byReport: (reportId: number) =>
       ["sightings", "byReport", reportId] as const,
+  },
+  petSightings: {
+    all: ["petSightings"] as const,
+    map: (filters: PetSightingMapFilters) =>
+      ["petSightings", "map", filters] as const,
+    list: (filters: PetSightingListFilters) =>
+      ["petSightings", "list", filters] as const,
+    detail: (id: number) => ["petSightings", "detail", id] as const,
   },
 } as const;

@@ -4,7 +4,7 @@ import type {
   LostReportMapFilters,
   LostReportListFilters,
 } from "@/types/pet-report";
-import type { PetSighting } from "@/types/sighting";
+import type { ReportSighting } from "@/types/sighting";
 import type { PaginatedResponse, ResourceResponse } from "@/types/api";
 
 export const petReportsApi = {
@@ -60,7 +60,7 @@ export const petReportsApi = {
       share_phone: boolean;
     },
   ) =>
-    api.post<ResourceResponse<PetSighting>>(
+    api.post<ResourceResponse<ReportSighting>>(
       `/pet-reports/${reportId}/sightings`,
       data,
     ),

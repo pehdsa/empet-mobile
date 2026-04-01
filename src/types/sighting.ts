@@ -1,4 +1,4 @@
-export interface PetSighting {
+export interface ReportSighting {
   id: number;
   reportId: number;
   location: { latitude: number; longitude: number };
