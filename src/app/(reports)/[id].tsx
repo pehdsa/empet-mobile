@@ -108,7 +108,7 @@ export default function PetReportDetail() {
             <ButtonPrimary
               label="Vi esse pet!"
               onPress={() =>
-                router.push(`/sighting/new?reportId=${parsedId}` as never)
+                router.push(`/(reports)/sighting/new?reportId=${parsedId}` as never)
               }
             />
           </View>

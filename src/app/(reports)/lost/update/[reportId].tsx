@@ -1,10 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
   ScrollView,
   Pressable,
-  Switch,
+  Image,
   ActivityIndicator,
   Platform,
   KeyboardAvoidingView,
@@ -14,24 +14,23 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
-import { MessageCircle } from "lucide-react-native";
 
 import { colors } from "@/lib/colors";
-import { usePetReportDetail, useCreateSighting } from "@/hooks/usePetReports";
-import { useLocation } from "@/hooks/useLocation";
+import { usePetReportDetail, useUpdatePetReport } from "@/hooks/usePetReports";
 import { useToastStore } from "@/stores/toast";
 import { mapApiErrors } from "@/utils/map-api-errors";
+import { speciesLabel, sizeLabel } from "@/constants/enums";
 
 import { NavHeader } from "@/components/ui/NavHeader";
 import { TextInput } from "@/components/ui/TextInput";
 import { DateTimePickerField } from "@/components/ui/DateTimePickerField";
 import { MapPickerInline } from "@/components/map/MapPickerInline";
-import { ReportPetCard } from "@/components/sighting/ReportPetCard";
+import { PhoneSection } from "@/components/shared/phone/PhoneSection";
 
 import {
-  sightingSchema,
-  type SightingFormValues,
-} from "@/features/sighting/schemas/sighting.schema";
+  reportLostSchema,
+  type ReportLostFormValues,
+} from "@/features/report-lost/schemas/report-lost.schema";
 import type { ValidationError } from "@/types/api";
 
 function parseId(raw: string | string[] | undefined): number | null {
@@ -40,7 +39,7 @@ function parseId(raw: string | string[] | undefined): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-export default function NewSightingScreen() {
+export default function UpdateReportScreen() {
   const { reportId: rawReportId } = useLocalSearchParams<{
     reportId: string;
   }>();
@@ -49,24 +48,51 @@ export default function NewSightingScreen() {
   const showToast = useToastStore((s) => s.show);
 
   const reportId = parseId(rawReportId);
-  const { data: report, isLoading: reportLoading } =
-    usePetReportDetail(reportId);
-  const { location } = useLocation();
-  const createSighting = useCreateSighting();
+  const {
+    data: report,
+    isLoading,
+    isError,
+    refetch,
+  } = usePetReportDetail(reportId);
+  const updateReport = useUpdatePetReport();
 
   const [coords, setCoords] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
 
-  const initialRegion = location
-    ? {
-        latitude: location.latitude,
-        longitude: location.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
+  const {
+    control,
+    handleSubmit,
+    setError,
+    reset,
+    formState: { errors },
+  } = useForm<ReportLostFormValues>({
+    resolver: zodResolver(reportLostSchema),
+    defaultValues: {
+      addressHint: "",
+      description: "",
+      lostAt: new Date(),
+    },
+  });
+
+  // Pre-preencher form quando report carrega
+  useEffect(() => {
+    if (report) {
+      reset({
+        addressHint: report.addressHint ?? "",
+        description: report.description ?? "",
+        lostAt: new Date(report.lostAt),
+      });
+      if (!coords) {
+        setCoords({
+          latitude: report.location.latitude,
+          longitude: report.location.longitude,
+        });
       }
-    : undefined;
+    }
+  }, [report]);
 
   const handleRegionChange = useCallback(
     (c: { latitude: number; longitude: number }) => {
@@ -74,25 +100,6 @@ export default function NewSightingScreen() {
     },
     [],
   );
-
-  if (!coords && location) {
-    setCoords({ latitude: location.latitude, longitude: location.longitude });
-  }
-
-  const {
-    control,
-    handleSubmit,
-    setError,
-    formState: { errors },
-  } = useForm<SightingFormValues>({
-    resolver: zodResolver(sightingSchema),
-    defaultValues: {
-      addressHint: "",
-      description: "",
-      sightedAt: new Date(),
-      sharePhone: false,
-    },
-  });
 
   const [descLength, setDescLength] = useState(0);
 
@@ -102,40 +109,44 @@ export default function NewSightingScreen() {
     return null;
   }
 
-  const onSubmit = (values: SightingFormValues) => {
-    if (!coords) {
-      showToast("Aguarde a localização carregar", "error");
-      return;
-    }
+  const pet = report?.pet;
 
-    createSighting.mutate(
+  const initialRegion = report
+    ? {
+        latitude: report.location.latitude,
+        longitude: report.location.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }
+    : undefined;
+
+  const onSubmit = (values: ReportLostFormValues) => {
+    if (!coords) return;
+
+    updateReport.mutate(
       {
-        reportId,
+        id: reportId,
         data: {
           latitude: coords.latitude,
           longitude: coords.longitude,
           address_hint: values.addressHint || undefined,
           description: values.description || undefined,
-          sighted_at: values.sightedAt.toISOString(),
-          share_phone: values.sharePhone,
+          lost_at: values.lostAt.toISOString(),
         },
       },
       {
         onSuccess: () => {
-          router.replace({
-            pathname: "/sighting/success" as never,
-            params: { reportId: String(reportId) },
-          });
+          showToast("Report atualizado!");
+          router.back();
         },
         onError: (err) => {
           if (err instanceof AxiosError && err.response?.status === 422) {
             mapApiErrors(setError, err as AxiosError<ValidationError>, {
               address_hint: "addressHint",
-              sighted_at: "sightedAt",
-              share_phone: "sharePhone",
+              lost_at: "lostAt",
             });
           } else {
-            showToast("Erro ao reportar avistamento", "error");
+            showToast("Erro ao atualizar report", "error");
           }
         },
       },
@@ -145,14 +156,29 @@ export default function NewSightingScreen() {
   return (
     <View className="flex-1 bg-background">
       <View style={{ paddingTop: insets.top }} className="bg-background">
-        <NavHeader title="Reportar avistamento" className="px-6" />
+        <NavHeader title="Atualizar Report" className="px-6" />
       </View>
 
-      {reportLoading ? (
+      {isLoading && (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.primary} size="large" />
         </View>
-      ) : (
+      )}
+
+      {isError && !isLoading && (
+        <View className="flex-1 items-center justify-center gap-3 px-6">
+          <Text className="font-montserrat-medium text-base text-text-primary">
+            Erro ao carregar
+          </Text>
+          <Pressable onPress={() => refetch()} className="mt-2 active:opacity-60">
+            <Text className="font-montserrat-medium text-sm text-primary">
+              Tentar novamente
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
+      {report && (
         <KeyboardAvoidingView
           className="flex-1"
           behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -161,20 +187,54 @@ export default function NewSightingScreen() {
             className="flex-1"
             contentContainerStyle={{ padding: 24, gap: 20 }}
             keyboardShouldPersistTaps="handled"
+            scrollEnabled={scrollEnabled}
           >
-            {/* Pet card */}
-            {report?.pet && <ReportPetCard pet={report.pet} />}
+            {/* Pet summary card (read-only) */}
+            {pet && (
+              <View className="flex-row items-center gap-3 rounded-2xl border border-border bg-surface p-3">
+                {pet.photos?.[0]?.url ? (
+                  <Image
+                    source={{ uri: pet.photos[0].url }}
+                    className="h-16 w-16 rounded-xl"
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View className="h-16 w-16 items-center justify-center rounded-xl bg-background">
+                    <Text className="font-montserrat-medium text-lg text-text-tertiary">
+                      {pet.name.charAt(0)}
+                    </Text>
+                  </View>
+                )}
+                <View className="flex-1 gap-0.5">
+                  <Text className="font-montserrat-bold text-base text-text-primary">
+                    {pet.name}
+                  </Text>
+                  <Text className="font-montserrat text-[13px] text-text-secondary">
+                    {speciesLabel[pet.species]} · {sizeLabel[pet.size]}
+                  </Text>
+                  {pet.breed && (
+                    <Text className="font-montserrat text-xs text-text-tertiary">
+                      {pet.breed.name}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            )}
 
-            {/* Mapa */}
+            {/* Local */}
             <View className="gap-3">
               <Text className="font-montserrat-bold text-base text-text-primary">
-                Onde você viu o pet?
+                Última localização conhecida
               </Text>
 
-              <MapPickerInline
-                initialRegion={initialRegion}
-                onRegionChange={handleRegionChange}
-              />
+              {initialRegion && (
+                <MapPickerInline
+                  initialRegion={initialRegion}
+                  onRegionChange={handleRegionChange}
+                  onTouchStart={() => setScrollEnabled(false)}
+                  onTouchEnd={() => setScrollEnabled(true)}
+                />
+              )}
 
               <Controller
                 control={control}
@@ -194,14 +254,14 @@ export default function NewSightingScreen() {
             {/* Data */}
             <Controller
               control={control}
-              name="sightedAt"
+              name="lostAt"
               render={({ field: { onChange, value } }) => (
                 <DateTimePickerField
-                  label="Quando você viu? *"
+                  label="Quando ele se perdeu? *"
                   value={value}
                   onChange={onChange}
                   maximumDate={new Date()}
-                  error={errors.sightedAt?.message}
+                  error={errors.lostAt?.message}
                 />
               )}
             />
@@ -213,8 +273,8 @@ export default function NewSightingScreen() {
               render={({ field: { onChange, value } }) => (
                 <View className="gap-1.5">
                   <TextInput
-                    label="Descrição"
-                    placeholder="Descreva o que viu: estado do pet, direção que seguia, etc."
+                    label="Atualize a descrição"
+                    placeholder="Descreva as circunstâncias: como ele fugiu, última vez que foi visto, etc."
                     value={value}
                     onChangeText={(text) => {
                       onChange(text);
@@ -231,27 +291,13 @@ export default function NewSightingScreen() {
               )}
             />
 
-            {/* Share phone */}
-            <Controller
-              control={control}
-              name="sharePhone"
-              render={({ field: { onChange, value } }) => (
-                <View className="flex-row items-center justify-between rounded-xl border border-border bg-surface p-4">
-                  <View className="flex-row items-center gap-2">
-                    <MessageCircle size={18} color="#25D366" />
-                    <Text className="font-montserrat-medium text-sm text-text-primary">
-                      Compartilhar meu telefone
-                    </Text>
-                  </View>
-                  <Switch
-                    value={value}
-                    onValueChange={onChange}
-                    trackColor={{ false: "#E2E2E2", true: colors.primary }}
-                    thumbColor="#FFFFFF"
-                  />
-                </View>
-              )}
-            />
+            {/* Telefones */}
+            <View className="gap-3">
+              <Text className="font-montserrat-medium text-sm text-text-primary">
+                Telefones para contato
+              </Text>
+              <PhoneSection />
+            </View>
 
             <View className="h-4" />
           </ScrollView>
@@ -263,16 +309,16 @@ export default function NewSightingScreen() {
           >
             <Pressable
               onPress={handleSubmit(onSubmit)}
-              disabled={createSighting.isPending}
+              disabled={updateReport.isPending}
               className={`h-12 items-center justify-center rounded-xl bg-primary active:opacity-80 ${
-                createSighting.isPending ? "opacity-50" : ""
+                updateReport.isPending ? "opacity-50" : ""
               }`}
             >
-              {createSighting.isPending ? (
+              {updateReport.isPending ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
                 <Text className="font-montserrat-bold text-base text-text-inverse">
-                  Reportar avistamento
+                  Salvar alterações
                 </Text>
               )}
             </Pressable>

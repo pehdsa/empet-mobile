@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef, useEffect } from "react";
-import { View, ActivityIndicator, StyleSheet, Animated, Linking } from "react-native";
+import { useState, useCallback, useRef } from "react";
+import { View, ActivityIndicator, StyleSheet, Linking } from "react-native";
 import MapView, { type Region } from "react-native-maps";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -68,24 +68,6 @@ export default function Home() {
 
   const hasActiveFilters = species !== undefined || size !== undefined;
 
-  // Animacao de opacidade dos marcadores
-  const markersOpacity = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    if (mapQuery.isPlaceholderData) {
-      Animated.timing(markersOpacity, {
-        toValue: 0.4,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(markersOpacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [mapQuery.isPlaceholderData, markersOpacity]);
 
   // Atualizar região quando localização chegar
   const hasSetInitial = useRef(false);
@@ -121,7 +103,7 @@ export default function Home() {
   const handlePreviewPress = useCallback(() => {
     if (!selectedReport) return;
     router.push({
-      pathname: "/pet-report/[id]",
+      pathname: "/(reports)/[id]",
       params: { id: String(selectedReport.id) },
     });
   }, [selectedReport, router]);
@@ -165,13 +147,13 @@ export default function Home() {
             showsCompass={false}
             showsScale={false}
           >
-            {mapQuery.data?.map((report) => (
+            {mapQuery.data?.map((report, index) => (
               <PetMarker
                 key={report.id}
                 report={report}
                 selected={selectedReport?.id === report.id}
                 onPress={() => handleMarkerPress(report)}
-                opacity={markersOpacity}
+                delay={index * 60}
               />
             ))}
           </MapView>
@@ -247,7 +229,7 @@ export default function Home() {
             hasActiveFilters={hasActiveFilters}
           />
           <SightingButton
-            onPress={() => router.push("/sighting/new" as never)}
+            onPress={() => router.push("/(sightings)/new" as never)}
           />
         </View>
       </View>

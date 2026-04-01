@@ -1,10 +1,9 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import {
   View,
   Text,
   ScrollView,
   Pressable,
-  Image,
   ActivityIndicator,
   Platform,
   KeyboardAvoidingView,
@@ -16,16 +15,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
 
 import { colors } from "@/lib/colors";
-import { usePetReportDetail, useUpdatePetReport } from "@/hooks/usePetReports";
+import { usePet } from "@/hooks/usePets";
+import { useCreatePetReport } from "@/hooks/usePetReports";
+import { useLocation } from "@/hooks/useLocation";
 import { useToastStore } from "@/stores/toast";
 import { mapApiErrors } from "@/utils/map-api-errors";
-import { speciesLabel, sizeLabel } from "@/constants/enums";
 
 import { NavHeader } from "@/components/ui/NavHeader";
 import { TextInput } from "@/components/ui/TextInput";
 import { DateTimePickerField } from "@/components/ui/DateTimePickerField";
 import { MapPickerInline } from "@/components/map/MapPickerInline";
-import { PhoneSection } from "@/components/report-lost/PhoneSection";
+import { PetSummaryCard } from "@/components/report-lost/PetSummaryCard";
+import { PhoneSection } from "@/components/shared/phone/PhoneSection";
 
 import {
   reportLostSchema,
@@ -39,33 +40,49 @@ function parseId(raw: string | string[] | undefined): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-export default function UpdateReportScreen() {
-  const { reportId: rawReportId } = useLocalSearchParams<{
-    reportId: string;
-  }>();
+export default function ReportLostScreen() {
+  const { petId: rawPetId } = useLocalSearchParams<{ petId: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const showToast = useToastStore((s) => s.show);
 
-  const reportId = parseId(rawReportId);
-  const {
-    data: report,
-    isLoading,
-    isError,
-    refetch,
-  } = usePetReportDetail(reportId);
-  const updateReport = useUpdatePetReport();
+  const petId = parseId(rawPetId);
+  const { data: pet, isLoading: petLoading } = usePet(petId);
+  const { location } = useLocation();
+  const createReport = useCreatePetReport();
 
+  // Coordenadas inicializadas com localizacao do usuario
   const [coords, setCoords] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
+
+  const initialRegion = location
+    ? {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }
+    : undefined;
+
+  const handleRegionChange = useCallback(
+    (c: { latitude: number; longitude: number }) => {
+      setCoords(c);
+    },
+    [],
+  );
+
+  // Inicializar coords com a localizacao quando disponivel
+  if (!coords && location) {
+    setCoords({ latitude: location.latitude, longitude: location.longitude });
+  }
 
   const {
     control,
     handleSubmit,
     setError,
-    reset,
     formState: { errors },
   } = useForm<ReportLostFormValues>({
     resolver: zodResolver(reportLostSchema),
@@ -76,76 +93,51 @@ export default function UpdateReportScreen() {
     },
   });
 
-  // Pre-preencher form quando report carrega
-  useEffect(() => {
-    if (report) {
-      reset({
-        addressHint: report.addressHint ?? "",
-        description: report.description ?? "",
-        lostAt: new Date(report.lostAt),
-      });
-      if (!coords) {
-        setCoords({
-          latitude: report.location.latitude,
-          longitude: report.location.longitude,
-        });
-      }
-    }
-  }, [report]);
-
-  const handleRegionChange = useCallback(
-    (c: { latitude: number; longitude: number }) => {
-      setCoords(c);
-    },
-    [],
-  );
-
   const [descLength, setDescLength] = useState(0);
 
-  if (reportId === null) {
-    showToast("Report inválido", "error");
+  if (petId === null) {
+    showToast("Pet inválido", "error");
     router.back();
     return null;
   }
 
-  const pet = report?.pet;
-
-  const initialRegion = report
-    ? {
-        latitude: report.location.latitude,
-        longitude: report.location.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      }
-    : undefined;
-
   const onSubmit = (values: ReportLostFormValues) => {
-    if (!coords) return;
+    if (!coords) {
+      showToast("Aguarde a localização carregar", "error");
+      return;
+    }
 
-    updateReport.mutate(
+    createReport.mutate(
       {
-        id: reportId,
-        data: {
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-          address_hint: values.addressHint || undefined,
-          description: values.description || undefined,
-          lost_at: values.lostAt.toISOString(),
-        },
+        pet_id: petId,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        address_hint: values.addressHint || undefined,
+        description: values.description || undefined,
+        lost_at: values.lostAt.toISOString(),
       },
       {
-        onSuccess: () => {
-          showToast("Report atualizado!");
-          router.back();
+        onSuccess: (response) => {
+          const reportId = response.data.data.id;
+          router.replace({
+            pathname: "/(reports)/lost/success" as never,
+            params: { reportId: String(reportId), petId: String(petId) },
+          });
         },
         onError: (err) => {
           if (err instanceof AxiosError && err.response?.status === 422) {
-            mapApiErrors(setError, err as AxiosError<ValidationError>, {
+            const apiErr = err as AxiosError<ValidationError>;
+            mapApiErrors(setError, apiErr, {
               address_hint: "addressHint",
               lost_at: "lostAt",
             });
+            const petIdError =
+              apiErr.response?.data?.errors?.pet_id?.[0];
+            if (petIdError) {
+              showToast(petIdError, "error");
+            }
           } else {
-            showToast("Erro ao atualizar report", "error");
+            showToast("Erro ao reportar pet perdido", "error");
           }
         },
       },
@@ -155,29 +147,14 @@ export default function UpdateReportScreen() {
   return (
     <View className="flex-1 bg-background">
       <View style={{ paddingTop: insets.top }} className="bg-background">
-        <NavHeader title="Atualizar Report" className="px-6" />
+        <NavHeader title="Reportar Perda" className="px-6" />
       </View>
 
-      {isLoading && (
+      {petLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.primary} size="large" />
         </View>
-      )}
-
-      {isError && !isLoading && (
-        <View className="flex-1 items-center justify-center gap-3 px-6">
-          <Text className="font-montserrat-medium text-base text-text-primary">
-            Erro ao carregar
-          </Text>
-          <Pressable onPress={() => refetch()} className="mt-2 active:opacity-60">
-            <Text className="font-montserrat-medium text-sm text-primary">
-              Tentar novamente
-            </Text>
-          </Pressable>
-        </View>
-      )}
-
-      {report && (
+      ) : (
         <KeyboardAvoidingView
           className="flex-1"
           behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -186,51 +163,25 @@ export default function UpdateReportScreen() {
             className="flex-1"
             contentContainerStyle={{ padding: 24, gap: 20 }}
             keyboardShouldPersistTaps="handled"
+            scrollEnabled={scrollEnabled}
           >
-            {/* Pet summary card (read-only) */}
+            {/* Pet summary */}
             {pet && (
-              <View className="flex-row items-center gap-3 rounded-2xl border border-border bg-surface p-3">
-                {pet.photos?.[0]?.url ? (
-                  <Image
-                    source={{ uri: pet.photos[0].url }}
-                    className="h-16 w-16 rounded-xl"
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View className="h-16 w-16 items-center justify-center rounded-xl bg-background">
-                    <Text className="font-montserrat-medium text-lg text-text-tertiary">
-                      {pet.name.charAt(0)}
-                    </Text>
-                  </View>
-                )}
-                <View className="flex-1 gap-0.5">
-                  <Text className="font-montserrat-bold text-base text-text-primary">
-                    {pet.name}
-                  </Text>
-                  <Text className="font-montserrat text-[13px] text-text-secondary">
-                    {speciesLabel[pet.species]} · {sizeLabel[pet.size]}
-                  </Text>
-                  {pet.breed && (
-                    <Text className="font-montserrat text-xs text-text-tertiary">
-                      {pet.breed.name}
-                    </Text>
-                  )}
-                </View>
-              </View>
+              <PetSummaryCard pet={pet} subtitle="Local marcado no mapa" />
             )}
 
-            {/* Local */}
+            {/* Secao local */}
             <View className="gap-3">
               <Text className="font-montserrat-bold text-base text-text-primary">
-                Última localização conhecida
+                Onde ele se perdeu?
               </Text>
 
-              {initialRegion && (
-                <MapPickerInline
-                  initialRegion={initialRegion}
-                  onRegionChange={handleRegionChange}
-                />
-              )}
+              <MapPickerInline
+                initialRegion={initialRegion}
+                onRegionChange={handleRegionChange}
+                onTouchStart={() => setScrollEnabled(false)}
+                onTouchEnd={() => setScrollEnabled(true)}
+              />
 
               <Controller
                 control={control}
@@ -269,7 +220,7 @@ export default function UpdateReportScreen() {
               render={({ field: { onChange, value } }) => (
                 <View className="gap-1.5">
                   <TextInput
-                    label="Atualize a descrição"
+                    label="O que aconteceu?"
                     placeholder="Descreva as circunstâncias: como ele fugiu, última vez que foi visto, etc."
                     value={value}
                     onChangeText={(text) => {
@@ -288,7 +239,12 @@ export default function UpdateReportScreen() {
             />
 
             {/* Telefones */}
-            <PhoneSection />
+            <View className="gap-3">
+              <Text className="font-montserrat-medium text-sm text-text-primary">
+                Telefones para contato
+              </Text>
+              <PhoneSection />
+            </View>
 
             <View className="h-4" />
           </ScrollView>
@@ -300,16 +256,17 @@ export default function UpdateReportScreen() {
           >
             <Pressable
               onPress={handleSubmit(onSubmit)}
-              disabled={updateReport.isPending}
-              className={`h-12 items-center justify-center rounded-xl bg-primary active:opacity-80 ${
-                updateReport.isPending ? "opacity-50" : ""
+              disabled={createReport.isPending}
+              className={`h-12 items-center justify-center rounded-xl active:opacity-80 ${
+                createReport.isPending ? "opacity-50" : ""
               }`}
+              style={{ backgroundColor: "#E53935" }}
             >
-              {updateReport.isPending ? (
+              {createReport.isPending ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
                 <Text className="font-montserrat-bold text-base text-text-inverse">
-                  Salvar alterações
+                  Reportar como perdido
                 </Text>
               )}
             </Pressable>

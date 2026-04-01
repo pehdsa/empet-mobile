@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { MapPin, PawPrint, Bell, Settings } from "lucide-react-native";
+import { Search, Eye, PawPrint, Bell, Settings } from "lucide-react-native";
 import { colors } from "@/lib/colors";
 
 export default function TabsLayout() {
@@ -15,14 +15,21 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
-          tabBarIcon: ({ color, size }) => <MapPin size={size} color={color} />,
+          title: "Perdidos",
+          tabBarIcon: ({ color, size }) => <Search size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="sightings"
+        options={{
+          title: "Avistados",
+          tabBarIcon: ({ color, size }) => <Eye size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="pets"
         options={{
-          title: "Pets",
+          title: "Meus Pets",
           tabBarIcon: ({ color, size }) => <PawPrint size={size} color={color} />,
         }}
       />

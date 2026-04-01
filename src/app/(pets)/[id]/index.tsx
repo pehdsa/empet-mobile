@@ -183,7 +183,7 @@ export default function PetDetailScreen() {
                 <Pressable
                   onPress={() =>
                     router.push({
-                      pathname: "/report-lost/update/[reportId]" as never,
+                      pathname: "/(reports)/lost/update/[reportId]" as never,
                       params: { reportId: String(pet.activeReportId) },
                     })
                   }
@@ -199,7 +199,7 @@ export default function PetDetailScreen() {
                 <Pressable
                   onPress={() =>
                     router.push({
-                      pathname: "/report-lost/[petId]" as never,
+                      pathname: "/(reports)/lost/[petId]" as never,
                       params: { petId: String(parsedId) },
                     })
                   }
@@ -216,7 +216,7 @@ export default function PetDetailScreen() {
               <Pressable
                 onPress={() =>
                   router.push({
-                    pathname: "/pets/[id]/edit",
+                    pathname: "/(pets)/[id]/edit" as never,
                     params: { id: String(parsedId) },
                   })
                 }
@@ -268,9 +268,9 @@ export default function PetDetailScreen() {
                 </Pressable>
                 <Pressable
                   onPress={() => setDeleteModalVisible(false)}
-                  className="py-1 active:opacity-60"
+                  className="w-full h-[42px] items-center justify-center active:opacity-60"
                 >
-                  <Text className="font-montserrat-medium text-sm text-text-secondary">
+                  <Text className="font-montserrat-medium text-[13px] text-text-tertiary">
                     Cancelar
                   </Text>
                 </Pressable>
@@ -316,7 +316,7 @@ export default function PetDetailScreen() {
                 </Pressable>
                 <Pressable
                   onPress={() => setFoundModalVisible(false)}
-                  className="py-1 active:opacity-60"
+                  className="w-full h-[42px] items-center justify-center active:opacity-60"
                 >
                   <Text className="font-montserrat-medium text-[13px] text-text-tertiary">
                     Cancelar

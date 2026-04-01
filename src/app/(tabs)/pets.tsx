@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PawPrint } from "lucide-react-native";
 import { colors } from "@/lib/colors";
 import { usePets } from "@/hooks/usePets";
-import { NavHeader } from "@/components/ui/NavHeader";
+
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PetCard } from "@/components/pet/PetCard";
 import { FAB } from "@/components/map/FAB";
@@ -16,10 +16,10 @@ export default function PetsScreen() {
   const { items, isLoading, isError, refetch, hasNextPage, isFetchingNextPage, fetchNextPage } =
     usePets();
 
-  const handleCreate = () => router.push("/pets/new");
+  const handleCreate = () => router.push("/(pets)/new");
 
   const handlePetPress = (pet: Pet) => {
-    router.push({ pathname: "/pets/[id]", params: { id: String(pet.id) } });
+    router.push({ pathname: "/(pets)/[id]", params: { id: String(pet.id) } });
   };
 
   const handleLoadMore = () => {
@@ -30,7 +30,11 @@ export default function PetsScreen() {
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-      <NavHeader title="Meus Pets" showBack={false} className="px-6" />
+      <View className="h-[52px] justify-center px-6">
+        <Text className="font-montserrat-bold text-lg text-text-primary">
+          Meus Pets
+        </Text>
+      </View>
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={colors.primary} />

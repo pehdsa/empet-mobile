@@ -44,7 +44,7 @@ export default function CreatePetScreen() {
         showToast("Pet cadastrado com sucesso!");
         const newId = response.data.data.id;
         router.replace({
-          pathname: "/pets/[id]",
+          pathname: "/(pets)/[id]",
           params: { id: String(newId) },
         });
       },

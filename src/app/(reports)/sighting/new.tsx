@@ -1,9 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
   ScrollView,
   Pressable,
+  Switch,
   ActivityIndicator,
   Platform,
   KeyboardAvoidingView,
@@ -13,10 +14,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
-
 import { colors } from "@/lib/colors";
-import { usePet } from "@/hooks/usePets";
-import { useCreatePetReport } from "@/hooks/usePetReports";
+import { usePetReportDetail, useCreateSighting } from "@/hooks/usePetReports";
 import { useLocation } from "@/hooks/useLocation";
 import { useToastStore } from "@/stores/toast";
 import { mapApiErrors } from "@/utils/map-api-errors";
@@ -25,13 +24,13 @@ import { NavHeader } from "@/components/ui/NavHeader";
 import { TextInput } from "@/components/ui/TextInput";
 import { DateTimePickerField } from "@/components/ui/DateTimePickerField";
 import { MapPickerInline } from "@/components/map/MapPickerInline";
-import { PetSummaryCard } from "@/components/report-lost/PetSummaryCard";
-import { PhoneSection } from "@/components/report-lost/PhoneSection";
+import { ReportPetCard } from "@/components/sighting/ReportPetCard";
+import { PhoneSection } from "@/components/shared/phone/PhoneSection";
 
 import {
-  reportLostSchema,
-  type ReportLostFormValues,
-} from "@/features/report-lost/schemas/report-lost.schema";
+  sightingSchema,
+  type SightingFormValues,
+} from "@/features/sighting/schemas/sighting.schema";
 import type { ValidationError } from "@/types/api";
 
 function parseId(raw: string | string[] | undefined): number | null {
@@ -40,22 +39,25 @@ function parseId(raw: string | string[] | undefined): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-export default function ReportLostScreen() {
-  const { petId: rawPetId } = useLocalSearchParams<{ petId: string }>();
+export default function NewSightingScreen() {
+  const { reportId: rawReportId } = useLocalSearchParams<{
+    reportId: string;
+  }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const showToast = useToastStore((s) => s.show);
 
-  const petId = parseId(rawPetId);
-  const { data: pet, isLoading: petLoading } = usePet(petId);
+  const reportId = parseId(rawReportId);
+  const { data: report, isLoading: reportLoading } =
+    usePetReportDetail(reportId);
   const { location } = useLocation();
-  const createReport = useCreatePetReport();
+  const createSighting = useCreateSighting();
 
-  // Coordenadas inicializadas com localizacao do usuario
   const [coords, setCoords] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
 
   const initialRegion = location
     ? {
@@ -73,70 +75,74 @@ export default function ReportLostScreen() {
     [],
   );
 
-  // Inicializar coords com a localizacao quando disponivel
-  if (!coords && location) {
-    setCoords({ latitude: location.latitude, longitude: location.longitude });
-  }
+  useEffect(() => {
+    if (!coords && location) {
+      setCoords({ latitude: location.latitude, longitude: location.longitude });
+    }
+  }, [location, coords]);
 
   const {
     control,
     handleSubmit,
     setError,
     formState: { errors },
-  } = useForm<ReportLostFormValues>({
-    resolver: zodResolver(reportLostSchema),
+  } = useForm<SightingFormValues>({
+    resolver: zodResolver(sightingSchema),
     defaultValues: {
       addressHint: "",
       description: "",
-      lostAt: new Date(),
+      sightedAt: new Date(),
+      sharePhone: false,
     },
   });
 
   const [descLength, setDescLength] = useState(0);
 
-  if (petId === null) {
-    showToast("Pet inválido", "error");
-    router.back();
+  useEffect(() => {
+    if (reportId === null) {
+      showToast("Report inválido", "error");
+      router.back();
+    }
+  }, [reportId]);
+
+  if (reportId === null) {
     return null;
   }
 
-  const onSubmit = (values: ReportLostFormValues) => {
+  const onSubmit = (values: SightingFormValues) => {
     if (!coords) {
       showToast("Aguarde a localização carregar", "error");
       return;
     }
 
-    createReport.mutate(
+    createSighting.mutate(
       {
-        pet_id: petId,
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-        address_hint: values.addressHint || undefined,
-        description: values.description || undefined,
-        lost_at: values.lostAt.toISOString(),
+        reportId,
+        data: {
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          address_hint: values.addressHint || undefined,
+          description: values.description || undefined,
+          sighted_at: values.sightedAt.toISOString(),
+          share_phone: values.sharePhone,
+        },
       },
       {
-        onSuccess: (response) => {
-          const reportId = response.data.data.id;
+        onSuccess: () => {
           router.replace({
-            pathname: "/report-lost/success" as never,
-            params: { reportId: String(reportId), petId: String(petId) },
+            pathname: "/(reports)/sighting/success" as never,
+            params: { reportId: String(reportId) },
           });
         },
         onError: (err) => {
           if (err instanceof AxiosError && err.response?.status === 422) {
-            const apiErr = err as AxiosError<ValidationError>;
-            mapApiErrors(setError, apiErr, {
+            mapApiErrors(setError, err as AxiosError<ValidationError>, {
               address_hint: "addressHint",
-              lost_at: "lostAt",
+              sighted_at: "sightedAt",
+              share_phone: "sharePhone",
             });
-            const petIdError =
-              apiErr.response?.data?.errors?.pet_id?.[0];
-            if (petIdError) {
-              showToast(petIdError, "error");
-            }
           } else {
-            showToast("Erro ao reportar pet perdido", "error");
+            showToast("Erro ao reportar avistamento", "error");
           }
         },
       },
@@ -146,10 +152,10 @@ export default function ReportLostScreen() {
   return (
     <View className="flex-1 bg-background">
       <View style={{ paddingTop: insets.top }} className="bg-background">
-        <NavHeader title="Reportar Perda" className="px-6" />
+        <NavHeader title="Reportar avistamento" className="px-6" />
       </View>
 
-      {petLoading ? (
+      {reportLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.primary} size="large" />
         </View>
@@ -162,21 +168,22 @@ export default function ReportLostScreen() {
             className="flex-1"
             contentContainerStyle={{ padding: 24, gap: 20 }}
             keyboardShouldPersistTaps="handled"
+            scrollEnabled={scrollEnabled}
           >
-            {/* Pet summary */}
-            {pet && (
-              <PetSummaryCard pet={pet} subtitle="Local marcado no mapa" />
-            )}
+            {/* Pet card */}
+            {report?.pet && <ReportPetCard pet={report.pet} />}
 
-            {/* Secao local */}
+            {/* Mapa */}
             <View className="gap-3">
               <Text className="font-montserrat-bold text-base text-text-primary">
-                Onde ele se perdeu?
+                Onde você viu o pet?
               </Text>
 
               <MapPickerInline
                 initialRegion={initialRegion}
                 onRegionChange={handleRegionChange}
+                onTouchStart={() => setScrollEnabled(false)}
+                onTouchEnd={() => setScrollEnabled(true)}
               />
 
               <Controller
@@ -197,14 +204,14 @@ export default function ReportLostScreen() {
             {/* Data */}
             <Controller
               control={control}
-              name="lostAt"
+              name="sightedAt"
               render={({ field: { onChange, value } }) => (
                 <DateTimePickerField
-                  label="Quando ele se perdeu? *"
+                  label="Quando você viu? *"
                   value={value}
                   onChange={onChange}
                   maximumDate={new Date()}
-                  error={errors.lostAt?.message}
+                  error={errors.sightedAt?.message}
                 />
               )}
             />
@@ -216,8 +223,8 @@ export default function ReportLostScreen() {
               render={({ field: { onChange, value } }) => (
                 <View className="gap-1.5">
                   <TextInput
-                    label="O que aconteceu?"
-                    placeholder="Descreva as circunstâncias: como ele fugiu, última vez que foi visto, etc."
+                    label="Descrição"
+                    placeholder="Descreva o que viu: estado do pet, direção que seguia, etc."
                     value={value}
                     onChangeText={(text) => {
                       onChange(text);
@@ -234,8 +241,31 @@ export default function ReportLostScreen() {
               )}
             />
 
-            {/* Telefones */}
-            <PhoneSection />
+            {/* Share phone */}
+            <Controller
+              control={control}
+              name="sharePhone"
+              render={({ field: { onChange, value } }) => (
+                <View className="gap-2 rounded-xl border border-border bg-surface p-4">
+                  <View className="flex-row items-center justify-between">
+                    <Text className="flex-1 font-montserrat-medium text-sm leading-5 text-text-primary">
+                      Compartilhar meu telefone{"\n"}com o dono?
+                    </Text>
+                    <Switch
+                      value={value}
+                      onValueChange={onChange}
+                      trackColor={{ false: "#E2E2E2", true: colors.primary }}
+                      thumbColor="#FFFFFF"
+                    />
+                  </View>
+                  <Text className="font-montserrat text-xs leading-4 text-text-tertiary">
+                    O dono poderá entrar em contato caso reconheça o animal
+                  </Text>
+
+                  {value && <PhoneSection />}
+                </View>
+              )}
+            />
 
             <View className="h-4" />
           </ScrollView>
@@ -247,17 +277,16 @@ export default function ReportLostScreen() {
           >
             <Pressable
               onPress={handleSubmit(onSubmit)}
-              disabled={createReport.isPending}
-              className={`h-12 items-center justify-center rounded-xl active:opacity-80 ${
-                createReport.isPending ? "opacity-50" : ""
+              disabled={createSighting.isPending}
+              className={`h-12 items-center justify-center rounded-xl bg-primary active:opacity-80 ${
+                createSighting.isPending ? "opacity-50" : ""
               }`}
-              style={{ backgroundColor: "#E53935" }}
             >
-              {createReport.isPending ? (
+              {createSighting.isPending ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
                 <Text className="font-montserrat-bold text-base text-text-inverse">
-                  Reportar como perdido
+                  Reportar avistamento
                 </Text>
               )}
             </Pressable>

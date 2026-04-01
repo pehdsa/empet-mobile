@@ -98,7 +98,7 @@ export default function ReportLostSuccessScreen() {
         <Pressable
           onPress={() =>
             router.replace({
-              pathname: "/pet-report/[id]" as never,
+              pathname: "/(reports)/[id]" as never,
               params: { id: String(reportId) },
             })
           }
