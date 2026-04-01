@@ -150,10 +150,15 @@ export default function PetDetailScreen() {
             <View className="h-4" />
           </ScrollView>
 
-          {/* Card Ver Matches (estado perdido, fixo entre scroll e bottom bar, oculto se 0 matches) */}
-          {isLost && (activeReport?.matchesCount ?? 0) > 0 && (
+          {/* Card Ver Matches (estado perdido) */}
+          {isLost && activeReport && (
             <Pressable
-              onPress={() => showToast("Em breve")}
+              onPress={() =>
+                router.push({
+                  pathname: "/(matches)/matches/[reportId]",
+                  params: { reportId: String(activeReport!.id) },
+                })
+              }
               className="flex-row items-center gap-3 border-t border-border px-6 py-3"
               style={{ backgroundColor: "#AD4FFF10" }}
             >
@@ -165,7 +170,7 @@ export default function PetDetailScreen() {
                   Ver Matches
                 </Text>
                 <Text className="font-montserrat text-xs text-text-secondary">
-                  {activeReport?.matchesCount ?? 0} pets encontrados com similaridade
+                  Verificar possíveis matches
                 </Text>
               </View>
               <ChevronRight size={20} color={colors.textTertiary} />
