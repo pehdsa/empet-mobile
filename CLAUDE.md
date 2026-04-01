@@ -16,6 +16,7 @@ npx expo install <pkg> # Deps com binding nativo (garante compatibilidade com SD
 
 ## Regras criticas
 
+- Componentes usados em multiplas paginas/features devem ficar em `components/shared/`
 - Nunca criar novos patterns sem seguir os existentes
 - Nunca duplicar fonte de verdade (ex: cores fora do `tailwind.config.ts`)
 - Sempre usar `ResourceResponse<T>` para responses de JsonResource da API
@@ -44,7 +45,11 @@ src/                    # Logica da aplicacao (alias @/)
     _layout.tsx         # Root: fonts → AppProviders → AuthProvider → Slot
     index.tsx           # Redirect baseado em auth state
     (auth)/             # Grupo publico (Stack)
-    (tabs)/             # Grupo autenticado (Tabs: Home + Config)
+    (tabs)/             # Tabs: Perdidos, Avistados, Meus Pets, Alertas, Config
+    (pets)/             # Dominio pets: new, [id], [id]/edit (Stack, sem tab bar)
+    (reports)/          # Dominio reports: [id], lost/, sighting/ (Stack, sem tab bar)
+    (sightings)/        # Dominio sightings: new, [id], success (Stack, sem tab bar)
+    (matches)/          # Dominio matches: [reportId], [reportId]/[matchId] (Stack, sem tab bar)
   assets/               # Icones, splash, imagens estaticas
   types/                # Um arquivo por entidade (unions reutilizaveis)
   services/api/         # client.ts (Axios + interceptors) + modulos por dominio
@@ -55,13 +60,17 @@ src/                    # Logica da aplicacao (alias @/)
   features/             # Logica por feature (schemas Zod, etc.)
   providers/            # AppProviders, AuthProvider
   components/           # Componentes reutilizaveis (NativeWind)
+    shared/             # Componentes usados em multiplas paginas/features
   utils/                # Formatadores (data, distancia, telefone)
   styles/               # global.css (Tailwind base)
 ```
 
 ## Navegacao (Expo Router)
 
-- File-based routing com grupos: `/(auth)` (Stack) e `/(tabs)` (Tabs)
+- File-based routing com grupos por dominio: `(auth)`, `(tabs)`, `(pets)`, `(reports)`, `(sightings)`, `(matches)`
+- `(tabs)/` contem apenas as 5 telas de tab — telas de detalhe/form ficam em groups separados como Stack push (sem tab bar)
+- Novas rotas devem seguir a organizacao por dominio: criar group `(dominio)/` com `_layout.tsx` Stack
+- Navegacao usa paths com group: `"/(pets)/[id]"`, `"/(reports)/[id]"`, `"/(sightings)/new"`
 - `AuthProvider` controla redirect com `useSegments()` — so redireciona se no grupo errado
 - `SplashScreen.hideAsync()` centralizado no AuthProvider (nao no _layout.tsx)
 - `typedRoutes: true` — rotas tipadas em compile-time
