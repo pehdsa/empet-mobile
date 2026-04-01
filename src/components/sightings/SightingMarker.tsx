@@ -36,6 +36,7 @@ export function SightingMarker({ sighting, selected, onPress, delay = 0 }: Sight
       onPress={onPress}
       anchor={{ x: 0.5, y: 0.5 }}
       tracksViewChanges
+      zIndex={1}
     >
       <Animated.View
         style={{
