@@ -1,13 +1,16 @@
-import type { Pet } from "./pet";
+import type { PetSighting } from "./pet-sighting";
 
 export type MatchStatus = "PENDING" | "CONFIRMED" | "DISMISSED";
 
 export interface PetMatch {
   id: number;
   reportId: number;
-  matchedPetId: number;
-  score: string;
-  distanceMeters: string;
+  sightingId: number;
+  score: number;
+  distanceMeters: number;
   status: MatchStatus;
-  matchedPet: Pet;
+  sighting: PetSighting;
+  isSightingDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
