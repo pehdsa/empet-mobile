@@ -6,13 +6,14 @@ import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 import { colors } from "@/lib/colors";
 import { useToastStore } from "@/stores/toast";
 import type { PhotoFormItem } from "@/types/pet";
-import { MAX_PHOTOS, MAX_PHOTO_SIZE_BYTES } from "@/features/pets/schemas/pet.schema";
+import { MAX_PHOTOS as DEFAULT_MAX_PHOTOS, MAX_PHOTO_SIZE_BYTES } from "@/features/pets/schemas/pet.schema";
 
 const HEIC_TYPES = ["image/heic", "image/heif"];
 
 interface PhotoUploaderProps {
   photos: PhotoFormItem[];
   onChange: (photos: PhotoFormItem[]) => void;
+  maxPhotos?: number;
 }
 
 const VALID_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
@@ -56,9 +57,9 @@ function PhotoThumb({
   );
 }
 
-export function PhotoUploader({ photos, onChange }: PhotoUploaderProps) {
+export function PhotoUploader({ photos, onChange, maxPhotos = DEFAULT_MAX_PHOTOS }: PhotoUploaderProps) {
   const showToast = useToastStore((s) => s.show);
-  const canAdd = photos.length < MAX_PHOTOS;
+  const canAdd = photos.length < maxPhotos;
   const handlePickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
@@ -70,7 +71,7 @@ export function PhotoUploader({ photos, onChange }: PhotoUploaderProps) {
       mediaTypes: ["images"],
       quality: 0.8,
       allowsMultipleSelection: true,
-      selectionLimit: MAX_PHOTOS - photos.length,
+      selectionLimit: maxPhotos - photos.length,
       exif: true,
     });
 
@@ -143,7 +144,7 @@ export function PhotoUploader({ photos, onChange }: PhotoUploaderProps) {
       });
     }
 
-    const allowed = newPhotos.slice(0, MAX_PHOTOS - photos.length);
+    const allowed = newPhotos.slice(0, maxPhotos - photos.length);
     const skippedLimit = newPhotos.length - allowed.length;
 
     if (skippedSize > 0 || skippedType > 0 || skippedLimit > 0) {
@@ -153,7 +154,7 @@ export function PhotoUploader({ photos, onChange }: PhotoUploaderProps) {
       if (skippedType > 0)
         parts.push(`${skippedType} com formato inválido`);
       if (skippedLimit > 0)
-        parts.push(`limite de ${MAX_PHOTOS} fotos atingido`);
+        parts.push(`limite de ${maxPhotos} fotos atingido`);
       showToast(
         `${parts.join(", ").replace(/^./, (c) => c.toUpperCase())}. ${skippedSize + skippedType + skippedLimit} ${skippedSize + skippedType + skippedLimit === 1 ? "foto ignorada" : "fotos ignoradas"}.`,
         "error",
@@ -192,7 +193,7 @@ export function PhotoUploader({ photos, onChange }: PhotoUploaderProps) {
       </View>
 
       <Text className="font-montserrat text-xs text-text-tertiary">
-        Adicione até {MAX_PHOTOS} fotos do pet
+        Adicione até {maxPhotos} fotos do pet
       </Text>
 
     </View>

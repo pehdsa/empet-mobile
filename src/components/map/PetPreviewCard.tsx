@@ -1,8 +1,5 @@
-import { useState } from "react";
-import { View, Text, Image, Pressable } from "react-native";
-import { MapPin, Clock, ChevronRight, Dog, Cat } from "lucide-react-native";
-import { colors } from "@/lib/colors";
 import { speciesLabel, sizeLabel } from "@/constants/enums";
+import { PetListCard } from "@/components/shared/PetListCard";
 import type { PetReport } from "@/types/pet-report";
 
 interface PetPreviewCardProps {
@@ -14,67 +11,23 @@ function getDaysAgo(dateString: string): string {
   const diff = Date.now() - new Date(dateString).getTime();
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   if (days === 0) return "Perdido hoje";
-  if (days === 1) return "Perdido ha 1 dia";
-  return `Perdido ha ${days} dias`;
+  if (days === 1) return "Perdido há 1 dia";
+  return `Perdido há ${days} dias`;
 }
 
 export function PetPreviewCard({ report, onPress }: PetPreviewCardProps) {
   const { pet, addressHint, lostAt } = report;
-  const photoUrl = pet.photos?.[0]?.url;
-  const [imageError, setImageError] = useState(false);
-
-  const showPlaceholder = !photoUrl || imageError;
 
   return (
-    <Pressable
+    <PetListCard
+      photoUrl={pet.photos?.[0]?.url}
+      species={pet.species}
+      title={pet.name}
+      subtitle={`${speciesLabel[pet.species]} · ${sizeLabel[pet.size]}${pet.primaryColor ? ` · ${pet.primaryColor}` : ""}`}
+      locationText={addressHint}
+      timeText={getDaysAgo(lostAt)}
       onPress={onPress}
-      className="mx-4 flex-row items-center gap-3 rounded-2xl bg-surface p-3 shadow-soft active:opacity-80"
-    >
-      {/* Foto */}
-      {!showPlaceholder ? (
-        <Image
-          source={{ uri: photoUrl }}
-          className="h-20 w-20 rounded-xl"
-          resizeMode="cover"
-          onError={() => setImageError(true)}
-        />
-      ) : (
-        <View className="h-20 w-20 items-center justify-center rounded-xl bg-border/30">
-          {pet.species === "DOG" ? (
-            <Dog size={32} color={colors.textTertiary} />
-          ) : (
-            <Cat size={32} color={colors.textTertiary} />
-          )}
-        </View>
-      )}
-
-      {/* Info */}
-      <View className="flex-1 gap-1">
-        <Text className="font-montserrat-semibold text-base text-text-primary" numberOfLines={1}>
-          {pet.name}
-        </Text>
-        <Text className="font-montserrat text-sm text-text-secondary" numberOfLines={1}>
-          {speciesLabel[pet.species]} · {sizeLabel[pet.size]}
-          {pet.primaryColor ? ` · ${pet.primaryColor}` : ""}
-        </Text>
-        {addressHint && (
-          <View className="flex-row items-center gap-1">
-            <MapPin size={12} color={colors.textTertiary} />
-            <Text className="font-montserrat text-xs text-text-tertiary" numberOfLines={1}>
-              {addressHint}
-            </Text>
-          </View>
-        )}
-        <View className="flex-row items-center gap-1">
-          <Clock size={12} color={colors.textTertiary} />
-          <Text className="font-montserrat text-xs text-text-tertiary">
-            {getDaysAgo(lostAt)}
-          </Text>
-        </View>
-      </View>
-
-      {/* Chevron */}
-      <ChevronRight size={20} color={colors.textTertiary} />
-    </Pressable>
+      className="mx-4"
+    />
   );
 }

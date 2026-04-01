@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { secureStorage } from "@/services/storage/secure";
-import { authApi } from "@/services/api/auth";
 import type { User } from "@/types/auth";
 
 const TOKEN_KEY = "auth_token";
@@ -41,6 +40,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (!token) return;
 
       set({ token });
+      const { authApi } = await import("@/services/api/auth");
       const response = await authApi.getCurrentUser();
       set({ user: response.data.data, isAuthenticated: true });
     } catch {

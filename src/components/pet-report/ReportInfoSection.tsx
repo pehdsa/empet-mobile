@@ -1,9 +1,9 @@
 import { View, Text } from "react-native";
-import MapView, { Marker } from "react-native-maps";
 import { Calendar, MapPin } from "lucide-react-native";
 import { colors } from "@/lib/colors";
 import { formatDate } from "@/utils/format-date";
 import { relativeTime } from "@/utils/relative-time";
+import { StaticMapPreview } from "@/components/shared/StaticMapPreview";
 import type { PetReport } from "@/types/pet-report";
 
 interface ReportInfoSectionProps {
@@ -57,34 +57,13 @@ export function ReportInfoSection({ report }: ReportInfoSectionProps) {
         </Text>
       )}
 
-      {/* Mini map */}
-      <View className="h-[140px] overflow-hidden rounded-xl">
-        <MapView
-          style={{ flex: 1 }}
-          initialRegion={{
-            latitude: report.location.latitude,
-            longitude: report.location.longitude,
-            latitudeDelta: 0.005,
-            longitudeDelta: 0.005,
-          }}
-          scrollEnabled={false}
-          zoomEnabled={false}
-          rotateEnabled={false}
-          pitchEnabled={false}
-          pointerEvents="none"
-          showsUserLocation={false}
-          showsMyLocationButton={false}
-          showsCompass={false}
-          showsScale={false}
-        >
-          <Marker
-            coordinate={{
-              latitude: report.location.latitude,
-              longitude: report.location.longitude,
-            }}
-          />
-        </MapView>
-      </View>
+      {/* Static map preview — não usa MKMapView para evitar corrupção
+           dos gesture recognizers no iOS (RNGH #2688) */}
+      <StaticMapPreview
+        latitude={report.location.latitude}
+        longitude={report.location.longitude}
+        label={report.pet.name}
+      />
     </View>
   );
 }

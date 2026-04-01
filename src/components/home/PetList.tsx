@@ -1,6 +1,9 @@
-import { View, Text, FlatList, ActivityIndicator, RefreshControl } from "react-native";
+import { View, Text, FlatList, ActivityIndicator, RefreshControl, useWindowDimensions } from "react-native";
+import { useRouter } from "expo-router";
 import { colors } from "@/lib/colors";
-import { PetListCard } from "./PetListCard";
+import { speciesLabel, sizeLabel } from "@/constants/enums";
+import { formatDistance } from "@/utils/format-distance";
+import { PetGridCard } from "@/components/shared/PetGridCard";
 import { MapEmptyState } from "@/components/map/MapEmptyState";
 import type { PetReport } from "@/types/pet-report";
 
@@ -17,6 +20,21 @@ interface PetListProps {
   contentTopInset: number;
 }
 
+function getDaysAgo(dateString: string): string {
+  const diff = Date.now() - new Date(dateString).getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days === 0) return "Perdido hoje";
+  if (days === 1) return "Perdido há 1 dia";
+  return `Perdido há ${days} dias`;
+}
+
+function buildLocationText(report: PetReport): string | null {
+  if (report.distanceMeters != null) {
+    return `${formatDistance(report.distanceMeters)}${report.addressHint ? ` - ${report.addressHint}` : ""}`;
+  }
+  return report.addressHint ?? null;
+}
+
 export function PetList({
   items,
   isLoading,
@@ -29,6 +47,12 @@ export function PetList({
   onOpenFilters,
   contentTopInset,
 }: PetListProps) {
+  const router = useRouter();
+  const { width: screenWidth } = useWindowDimensions();
+  const PADDING = 16 * 2; // paddingHorizontal
+  const GAP = 12;
+  const cardWidth = (screenWidth - PADDING - GAP) / 2;
+
   const handleEndReached = () => {
     if (hasNextPage && !isFetchingNextPage) {
       onFetchNextPage();
@@ -55,7 +79,25 @@ export function PetList({
     <FlatList
       data={items}
       keyExtractor={(item) => String(item.id)}
-      renderItem={({ item }) => <PetListCard report={item} />}
+      numColumns={2}
+      columnWrapperStyle={{ gap: 12 }}
+      renderItem={({ item }) => (
+        <PetGridCard
+          width={cardWidth}
+          photoUrl={item.pet.photos?.[0]?.url}
+          species={item.pet.species}
+          title={item.pet.name}
+          subtitle={`${speciesLabel[item.pet.species]} · ${sizeLabel[item.pet.size]}${item.pet.primaryColor ? ` · ${item.pet.primaryColor}` : ""}`}
+          locationText={buildLocationText(item)}
+          timeText={getDaysAgo(item.lostAt)}
+          onPress={() =>
+            router.push({
+              pathname: "/(reports)/[id]",
+              params: { id: String(item.id) },
+            })
+          }
+        />
+      )}
       ListHeaderComponent={
         <Text className="font-montserrat-bold text-lg text-text-primary">
           Pets perdidos

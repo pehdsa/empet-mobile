@@ -66,7 +66,7 @@ export function DateTimePickerField({
 
   return (
     <View className="gap-1.5">
-      <Text className="font-montserrat-medium text-sm text-text-primary">
+      <Text className="font-montserrat-medium text-[13px] text-text-secondary">
         {label}
       </Text>
 
@@ -76,7 +76,7 @@ export function DateTimePickerField({
           error ? "border-error" : "border-border"
         }`}
       >
-        <Text className="font-montserrat text-sm text-text-primary">
+        <Text className="font-montserrat text-[15px] text-text-primary">
           {formatDateTime(value.toISOString())}
         </Text>
         <Calendar size={20} color={colors.textTertiary} />

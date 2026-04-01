@@ -8,6 +8,8 @@ import { colors } from "@/lib/colors";
 interface MapPickerInlineProps {
   initialRegion?: Region;
   onRegionChange: (coords: { latitude: number; longitude: number }) => void;
+  onTouchStart?: () => void;
+  onTouchEnd?: () => void;
   height?: number;
 }
 
@@ -16,10 +18,13 @@ interface MapPickerInlineProps {
  * - initialRegion usado apenas no mount
  * - Nao tenta sincronizar de volta depois
  * - A tela recebe coordenadas via onRegionChange e as armazena em useState local
+ * - onTouchStart/onTouchEnd permitem ao pai desabilitar scroll enquanto o mapa é arrastado
  */
 export function MapPickerInline({
   initialRegion,
   onRegionChange,
+  onTouchStart,
+  onTouchEnd,
   height = 200,
 }: MapPickerInlineProps) {
   const mapRef = useRef<MapView>(null);
@@ -42,6 +47,8 @@ export function MapPickerInline({
     <View
       className="overflow-hidden rounded-xl border border-border"
       style={{ height }}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
       <MapView
         ref={mapRef}
@@ -82,6 +89,8 @@ const ringStyle: ViewStyle = {
 };
 
 const ringShadowStyle: ViewStyle = {
+  width: 44,
+  height: 44,
   shadowColor: colors.primary,
   shadowOffset: { width: 0, height: 2 },
   shadowOpacity: 0.25,

@@ -14,7 +14,7 @@ interface HomePetReportsState {
 }
 
 export const useHomePetReportsStore = create<HomePetReportsState>((set) => ({
-  viewMode: "map",
+  viewMode: "list",
   species: undefined,
   size: undefined,
   setViewMode: (viewMode) => set({ viewMode }),
