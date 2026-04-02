@@ -1,10 +1,9 @@
-import { View } from "react-native";
+import { View, Text } from "react-native";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isAxiosError } from "axios";
 import { Screen } from "@/components/ui/Screen";
-import { NavHeader } from "@/components/ui/NavHeader";
 import { TextInput } from "@/components/ui/TextInput";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { ButtonPrimary } from "@/components/ui/ButtonPrimary";
@@ -54,9 +53,15 @@ export default function Login() {
 
   return (
     <Screen>
-      <NavHeader title="Entrar" />
-
       <View className="flex-1 justify-center gap-4">
+        <View className="items-center gap-2">
+          <Text className="font-montserrat-bold text-2xl text-text-primary">
+            Bem-vindo de volta
+          </Text>
+          <Text className="font-montserrat text-sm text-text-secondary">
+            Faça login para continuar
+          </Text>
+        </View>
         <Controller
           control={control}
           name="email"
