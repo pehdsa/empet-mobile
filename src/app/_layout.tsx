@@ -10,6 +10,7 @@ import {
 } from "@expo-google-fonts/montserrat";
 import { AppProviders } from "@/providers/AppProviders";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { ToastProvider } from "@/providers/ToastProvider";
 
 // Chamado fora do componente intencionalmente — executa uma unica vez no carregamento do modulo.
 void SplashScreen.preventAutoHideAsync();
@@ -27,10 +28,12 @@ export default function RootLayout() {
   }
 
   return (
-    <AppProviders>
-      <AuthProvider>
-        <Stack screenOptions={{ headerShown: false }} />
-      </AuthProvider>
-    </AppProviders>
+    <ToastProvider>
+      <AppProviders>
+        <AuthProvider>
+          <Stack screenOptions={{ headerShown: false }} />
+        </AuthProvider>
+      </AppProviders>
+    </ToastProvider>
   );
 }

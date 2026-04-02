@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Animated, Text } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CircleAlert, CircleCheck } from "lucide-react-native";
 import { colors } from "@/lib/colors";
 import { useToastStore } from "@/stores/toast";
@@ -8,6 +9,7 @@ const TOAST_DURATION = 3000;
 
 export function Toast() {
   const { message, variant, visible, hide } = useToastStore();
+  const insets = useSafeAreaInsets();
   const opacity = useRef(new Animated.Value(0)).current;
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -43,8 +45,8 @@ export function Toast() {
 
   return (
     <Animated.View
-      className={`absolute left-6 right-6 top-14 z-50 flex-row items-center gap-2 rounded-xl px-4 py-3 ${bgClass}`}
-      style={{ opacity }}
+      className={`absolute left-6 right-6 z-50 flex-row items-center gap-2 rounded-xl px-4 py-3 ${bgClass}`}
+      style={{ opacity, top: insets.top + 8 }}
     >
       <Icon size={18} color={iconColor} />
       <Text className={`flex-1 font-montserrat text-[13px] ${textClass}`}>{message}</Text>
