@@ -1,7 +1,8 @@
 import { View, Text, Pressable } from "react-native";
-import { Phone, Pencil, Trash2, MessageCircle } from "lucide-react-native";
+import { Phone, Pencil, Trash2 } from "lucide-react-native";
 import { colors } from "@/lib/colors";
 import { phoneMask } from "@/utils/phone-mask";
+import { WhatsAppIcon } from "@/components/shared/WhatsAppIcon";
 import type { UserPhone } from "@/types/phone";
 
 interface PhoneEntryProps {
@@ -21,8 +22,8 @@ export function PhoneEntry({ phone, onEdit, onDelete }: PhoneEntryProps) {
         </Text>
         {phone.isWhatsapp && (
           <View className="flex-row items-center gap-1">
-            <MessageCircle size={12} color="#25D366" />
-            <Text style={{ color: "#25D366" }} className="font-montserrat text-[11px]">
+            <WhatsAppIcon size={12} />
+            <Text className="font-montserrat text-[11px] text-whatsapp">
               WhatsApp
             </Text>
           </View>

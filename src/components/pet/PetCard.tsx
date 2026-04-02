@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { View, Text, Image, Pressable } from "react-native";
-import { ChevronRight, Dog, Cat } from "lucide-react-native";
+import { ChevronRight } from "lucide-react-native";
 import { colors } from "@/lib/colors";
 import { speciesLabel, sizeLabel } from "@/constants/enums";
+import { PetPhotoPlaceholder } from "@/components/shared/PetPhotoPlaceholder";
 import type { Pet } from "@/types/pet";
 
 interface PetCardProps {
@@ -14,7 +15,6 @@ export function PetCard({ pet, onPress }: PetCardProps) {
   const photoUrl = pet.photos?.[0]?.url;
   const [imageError, setImageError] = useState(false);
   const showPlaceholder = !photoUrl || imageError;
-  const SpeciesIcon = pet.species === "DOG" ? Dog : Cat;
 
   return (
     <Pressable
@@ -30,9 +30,7 @@ export function PetCard({ pet, onPress }: PetCardProps) {
           onError={() => setImageError(true)}
         />
       ) : (
-        <View className="h-16 w-16 items-center justify-center rounded-xl bg-border/30">
-          <SpeciesIcon size={28} color={colors.textTertiary} />
-        </View>
+        <PetPhotoPlaceholder species={pet.species} iconSize={28} className="h-16 w-16" />
       )}
 
       {/* Info */}

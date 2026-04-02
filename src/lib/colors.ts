@@ -18,4 +18,5 @@ export const colors = {
   border: themeColors.border,
   error: themeColors.error,
   success: themeColors.success,
+  whatsapp: themeColors.whatsapp,
 } as const;
