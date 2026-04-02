@@ -58,12 +58,23 @@ export function PetForm({ form, mode }: PetFormProps) {
 
   return (
     <View className="gap-6">
+      {mode === "create" && (
+        <Text className="font-montserrat text-sm leading-5 text-text-secondary">
+          Quanto mais detalhes você preencher, maiores as chances de encontrar seu pet quando for necessário.
+        </Text>
+      )}
+
       {/* Fotos */}
       <Controller
         control={control}
         name="photos"
         render={({ field: { value, onChange } }) => (
-          <PhotoUploader photos={value} onChange={onChange} />
+          <View className="gap-1.5">
+            <Text className="font-montserrat-medium text-[13px] text-text-secondary">
+              Fotos
+            </Text>
+            <PhotoUploader photos={value} onChange={onChange} />
+          </View>
         )}
       />
 
@@ -73,7 +84,7 @@ export function PetForm({ form, mode }: PetFormProps) {
         name="name"
         render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
           <TextInput
-            label="Nome do pet"
+            label="Nome do pet *"
             placeholder="Ex: Rex, Luna..."
             value={value}
             onChangeText={onChange}
@@ -90,7 +101,7 @@ export function PetForm({ form, mode }: PetFormProps) {
         render={({ field: { value, onChange }, fieldState: { error } }) => (
           <View className="gap-2">
             <Text className="font-montserrat-medium text-[13px] text-text-secondary">
-              Espécie
+              Espécie *
             </Text>
             <View className="flex-row gap-2">
               {SPECIES_OPTIONS.map((sp) => (
@@ -116,7 +127,7 @@ export function PetForm({ form, mode }: PetFormProps) {
         render={({ field: { value, onChange }, fieldState: { error } }) => (
           <View className="gap-2">
             <Text className="font-montserrat-medium text-[13px] text-text-secondary">
-              Porte
+              Porte *
             </Text>
             <View className="flex-row gap-2">
               {SIZE_OPTIONS.map((sz) => (
@@ -142,7 +153,7 @@ export function PetForm({ form, mode }: PetFormProps) {
         render={({ field: { value, onChange }, fieldState: { error } }) => (
           <View className="gap-2">
             <Text className="font-montserrat-medium text-[13px] text-text-secondary">
-              Sexo
+              Sexo *
             </Text>
             <View className="flex-row gap-2">
               {SEX_OPTIONS.map((sx) => (
