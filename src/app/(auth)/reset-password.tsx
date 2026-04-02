@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -78,6 +78,15 @@ export default function ResetPassword() {
       <NavHeader title="Nova senha" />
 
       <View className="flex-1 justify-center gap-4">
+        <View className="items-center gap-2">
+          <Text className="font-montserrat-bold text-2xl text-text-primary">
+            Redefinir senha
+          </Text>
+          <Text className="text-center font-montserrat text-sm text-text-secondary">
+            Crie uma nova senha com pelo menos 8 caracteres.
+          </Text>
+        </View>
+
         <Controller
           control={control}
           name="password"

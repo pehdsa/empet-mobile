@@ -61,9 +61,14 @@ export default function ForgotPassword() {
       <NavHeader title="Esqueci minha senha" />
 
       <View className="flex-1 justify-center gap-4">
-        <Text className="font-montserrat text-sm text-text-secondary">
-          Informe seu email para receber um código de verificação.
-        </Text>
+        <View className="items-center gap-2">
+          <Text className="font-montserrat-bold text-2xl text-text-primary">
+            Esqueci minha senha
+          </Text>
+          <Text className="text-center font-montserrat text-sm text-text-secondary">
+            Digite seu e-mail para receber o código de verificação.
+          </Text>
+        </View>
 
         <Controller
           control={control}

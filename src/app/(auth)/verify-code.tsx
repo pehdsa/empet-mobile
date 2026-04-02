@@ -87,9 +87,14 @@ export default function VerifyCode() {
       <NavHeader title="Verificar código" />
 
       <View className="flex-1 justify-center gap-4">
-        <Text className="font-montserrat text-sm text-text-secondary">
-          Insira o código de 6 dígitos enviado para {email}.
-        </Text>
+        <View className="items-center gap-2">
+          <Text className="font-montserrat-bold text-2xl text-text-primary">
+            Verificar código
+          </Text>
+          <Text className="text-center font-montserrat text-sm text-text-secondary">
+            Digite o código de 6 dígitos enviado ao seu e-mail.
+          </Text>
+        </View>
 
         <Controller
           control={control}
