@@ -178,6 +178,12 @@ export default function NewPetSightingScreen() {
           keyboardShouldPersistTaps="handled"
           scrollEnabled={scrollEnabled}
         >
+          {/* Orientação */}
+          <Text className="font-montserrat text-sm leading-5 text-text-secondary">
+            Quanto mais informações você preencher, maiores as chances de
+            reencontrar o dono do pet.
+          </Text>
+
           {/* Fotos */}
           <Controller
             control={control}
@@ -259,6 +265,32 @@ export default function NewPetSightingScreen() {
               )}
             />
           </View>
+
+          {/* Share phone toggle */}
+          <Controller
+            control={control}
+            name="sharePhone"
+            render={({ field: { onChange, value } }) => (
+              <View className="gap-2 rounded-xl border border-border bg-surface p-4">
+                <View className="flex-row items-center justify-between">
+                  <Text className="flex-1 font-montserrat-medium text-sm leading-5 text-text-primary">
+                    Compartilhar meu telefone{"\n"}com o dono?
+                  </Text>
+                  <Switch
+                    value={value}
+                    onValueChange={onChange}
+                    trackColor={{ false: "#E2E2E2", true: colors.primary }}
+                    thumbColor="#FFFFFF"
+                  />
+                </View>
+                <Text className="font-montserrat text-xs leading-4 text-text-tertiary">
+                  O dono poderá entrar em contato caso reconheça o animal
+                </Text>
+
+                {value && <PhoneSection />}
+              </View>
+            )}
+          />
 
           {/* Especie */}
           <Controller
@@ -445,32 +477,6 @@ export default function NewPetSightingScreen() {
             name="characteristicIds"
             render={({ field: { value, onChange } }) => (
               <CharacteristicsPicker selectedIds={value} onChange={onChange} />
-            )}
-          />
-
-          {/* Share phone toggle */}
-          <Controller
-            control={control}
-            name="sharePhone"
-            render={({ field: { onChange, value } }) => (
-              <View className="gap-2 rounded-xl border border-border bg-surface p-4">
-                <View className="flex-row items-center justify-between">
-                  <Text className="flex-1 font-montserrat-medium text-sm leading-5 text-text-primary">
-                    Compartilhar meu telefone{"\n"}com o dono?
-                  </Text>
-                  <Switch
-                    value={value}
-                    onValueChange={onChange}
-                    trackColor={{ false: "#E2E2E2", true: colors.primary }}
-                    thumbColor="#FFFFFF"
-                  />
-                </View>
-                <Text className="font-montserrat text-xs leading-4 text-text-tertiary">
-                  O dono poderá entrar em contato caso reconheça o animal
-                </Text>
-
-                {value && <PhoneSection />}
-              </View>
             )}
           />
 
