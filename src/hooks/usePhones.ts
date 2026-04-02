@@ -39,7 +39,7 @@ export function useUpdatePhone() {
       data,
     }: {
       id: number;
-      data: { phone?: string; is_whatsapp?: boolean; label?: string };
+      data: { phone?: string; is_whatsapp?: boolean; label?: string; is_primary?: boolean };
     }) => phonesApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.phones.all });

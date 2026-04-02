@@ -48,6 +48,12 @@ export const petReportsApi = {
   markFound: (id: number) =>
     api.patch<ResourceResponse<PetReport>>(`/pet-reports/${id}/found`),
 
+  /** Listar reports LOST do usuário autenticado */
+  listMyLostReports: (page: number = 1) =>
+    api.get<PaginatedResponse<PetReport>>("/pet-reports", {
+      params: { status: "LOST", page },
+    }),
+
   /** Criar avistamento */
   createSighting: (
     reportId: number,

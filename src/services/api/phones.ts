@@ -10,7 +10,7 @@ export const phonesApi = {
 
   update: (
     id: number,
-    data: { phone?: string; is_whatsapp?: boolean; label?: string },
+    data: { phone?: string; is_whatsapp?: boolean; label?: string; is_primary?: boolean },
   ) => api.put<ResourceResponse<UserPhone>>(`/user/phones/${id}`, data),
 
   delete: (id: number) =>

@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { View, Text, Pressable, ScrollView, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
+import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
-  PawPrint,
+  Search,
+  Eye,
   Phone,
   Lock,
   Bell,
@@ -24,7 +26,7 @@ function getInitials(name: string): string {
     .join("");
 }
 
-interface SettingsItemProps {
+interface MenuItem {
   icon: React.ReactNode;
   label: string;
   onPress: () => void;
@@ -32,13 +34,7 @@ interface SettingsItemProps {
   danger?: boolean;
 }
 
-function SettingsItem({
-  icon,
-  label,
-  onPress,
-  rightElement,
-  danger,
-}: SettingsItemProps) {
+function MenuItemRow({ icon, label, onPress, rightElement, danger }: MenuItem) {
   return (
     <Pressable
       onPress={onPress}
@@ -60,14 +56,11 @@ function Divider() {
 }
 
 export default function Settings() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const user = useAuthStore((s) => s.user);
   const logout = useLogout();
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
-
-  const showComingSoon = () => {
-    Alert.alert("Em breve", "Esta funcionalidade estará disponível em breve.");
-  };
 
   const handleLogout = () => {
     setLogoutModalVisible(false);
@@ -76,22 +69,55 @@ export default function Settings() {
 
   const initials = user ? getInitials(user.name) : "??";
 
+  const chevron = <ChevronRight size={16} color={colors.border} />;
+
+  const meusDadosItems: MenuItem[] = [
+    {
+      icon: <Search size={24} color={colors.primary} />,
+      label: "Meus pets perdidos",
+      onPress: () => router.push("/(menu)/my-lost-pets" as never),
+      rightElement: chevron,
+    },
+    {
+      icon: <Eye size={24} color={colors.primary} />,
+      label: "Meus avistamentos",
+      onPress: () => router.push("/(menu)/my-sightings" as never),
+      rightElement: chevron,
+    },
+    {
+      icon: <Phone size={24} color={colors.primary} />,
+      label: "Telefones",
+      onPress: () => router.push("/(menu)/phones" as never),
+      rightElement: chevron,
+    },
+    {
+      icon: <Lock size={24} color={colors.primary} />,
+      label: "Alterar senha",
+      onPress: () => router.push("/(menu)/change-password" as never),
+      rightElement: chevron,
+    },
+  ];
+
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
       {/* Title */}
       <View className="px-6 pb-2 pt-4">
         <Text className="font-montserrat-bold text-2xl text-text-primary">
-          Configurações
+          Menu
         </Text>
       </View>
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 16 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingBottom: 16,
+          gap: 16,
+        }}
         showsVerticalScrollIndicator={false}
       >
         {/* Profile Card */}
-        <View className="flex-row items-center gap-3 rounded-2xl bg-white p-4 shadow-sm">
+        <View className="flex-row items-center gap-3 rounded-2xl bg-white p-4 shadow-soft">
           <View className="h-14 w-14 items-center justify-center rounded-full bg-primary">
             <Text className="font-montserrat-bold text-xl text-white">
               {initials}
@@ -109,63 +135,43 @@ export default function Settings() {
 
         {/* Meus Dados */}
         <View className="gap-1">
-          <Text className="font-montserrat-medium text-xs text-text-tertiary">
+          <Text className="px-1 font-montserrat-medium text-xs text-text-tertiary">
             MEUS DADOS
           </Text>
           <View className="overflow-hidden rounded-xl bg-white">
-            <SettingsItem
-              icon={<PawPrint size={24} color={colors.primary} />}
-              label="Meus Pets"
-              onPress={showComingSoon}
-              rightElement={
-                <ChevronRight size={16} color={colors.border} />
-              }
-            />
-            <Divider />
-            <SettingsItem
-              icon={<Phone size={24} color={colors.primary} />}
-              label="Telefones"
-              onPress={showComingSoon}
-              rightElement={
-                <ChevronRight size={16} color={colors.border} />
-              }
-            />
-            <Divider />
-            <SettingsItem
-              icon={<Lock size={24} color={colors.primary} />}
-              label="Alterar senha"
-              onPress={showComingSoon}
-              rightElement={
-                <ChevronRight size={16} color={colors.border} />
-              }
-            />
+            {meusDadosItems.map((item, i) => (
+              <View key={item.label}>
+                {i > 0 && <Divider />}
+                <MenuItemRow {...item} />
+              </View>
+            ))}
           </View>
         </View>
 
         {/* Notificações */}
         <View className="gap-1">
-          <Text className="font-montserrat-medium text-xs text-text-tertiary">
+          <Text className="px-1 font-montserrat-medium text-xs text-text-tertiary">
             NOTIFICAÇÕES
           </Text>
           <View className="overflow-hidden rounded-xl bg-white">
-            <SettingsItem
+            <MenuItemRow
               icon={<Bell size={24} color={colors.primary} />}
               label="Configurar notificações"
-              onPress={showComingSoon}
-              rightElement={
-                <ChevronRight size={16} color={colors.border} />
+              onPress={() =>
+                router.push("/(menu)/notification-settings" as never)
               }
+              rightElement={chevron}
             />
           </View>
         </View>
 
         {/* Sobre */}
         <View className="gap-1">
-          <Text className="font-montserrat-medium text-xs text-text-tertiary">
+          <Text className="px-1 font-montserrat-medium text-xs text-text-tertiary">
             SOBRE
           </Text>
           <View className="overflow-hidden rounded-xl bg-white">
-            <SettingsItem
+            <MenuItemRow
               icon={<Info size={24} color={colors.textTertiary} />}
               label="Versão do app"
               onPress={() => {}}
@@ -181,7 +187,7 @@ export default function Settings() {
         {/* Sair */}
         <View className="gap-1">
           <View className="overflow-hidden rounded-xl bg-white">
-            <SettingsItem
+            <MenuItemRow
               icon={<LogOut size={24} color={colors.error} />}
               label="Sair"
               onPress={() => setLogoutModalVisible(true)}
@@ -197,22 +203,15 @@ export default function Settings() {
         onClose={() => setLogoutModalVisible(false)}
       >
         <View className="items-center gap-4">
-          {/* Icon */}
           <View className="h-14 w-14 items-center justify-center rounded-full bg-error/10">
             <LogOut size={28} color={colors.error} />
           </View>
-
-          {/* Title */}
           <Text className="font-montserrat-bold text-lg text-text-primary">
             Sair do app?
           </Text>
-
-          {/* Description */}
           <Text className="text-center font-montserrat text-sm leading-5 text-text-secondary">
             Você precisará fazer login novamente para acessar o app.
           </Text>
-
-          {/* Buttons */}
           <View className="w-full flex-row gap-3">
             <Pressable
               onPress={() => setLogoutModalVisible(false)}
