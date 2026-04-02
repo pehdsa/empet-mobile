@@ -51,4 +51,20 @@ export const queryKeys = {
     byReport: (reportId: number, status?: MatchStatus) =>
       ["matches", "byReport", reportId, status] as const,
   },
+  notifications: {
+    all: ["notifications"] as const,
+    list: () => ["notifications", "list"] as const,
+    unreadCount: () => ["notifications", "unreadCount"] as const,
+  },
+  notificationSettings: {
+    all: ["notificationSettings"] as const,
+  },
+  myLostReports: {
+    all: ["myLostReports"] as const,
+    list: () => ["myLostReports", "list"] as const,
+  },
+  mySightings: {
+    all: ["mySightings"] as const,
+    list: () => ["mySightings", "list"] as const,
+  },
 } as const;
