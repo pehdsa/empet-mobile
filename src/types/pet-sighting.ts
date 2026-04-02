@@ -42,6 +42,17 @@ export interface PetSighting {
   updatedAt: string;
 }
 
+export interface SightingOwner {
+  name: string;
+  phone: string | null;
+  phoneIsWhatsapp: boolean | null;
+}
+
+export interface SightingClaimResponse {
+  sightingId: number;
+  sightingOwner: SightingOwner;
+}
+
 /** Filtros para GET /pet-sightings/map (sem paginacao, com radius_km) */
 export interface PetSightingMapFilters {
   latitude: number;

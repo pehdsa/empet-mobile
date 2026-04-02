@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { View, ScrollView, ActivityIndicator, Pressable, Text } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -5,7 +6,9 @@ import { Calendar, MapPin, CircleAlert, Dog, Cat } from "lucide-react-native";
 
 import { colors } from "@/lib/colors";
 import { StaticMapPreview } from "@/components/shared/StaticMapPreview";
-import { usePetSightingDetail } from "@/hooks/usePetSightings";
+import { usePetSightingDetail, useClaimSighting } from "@/hooks/usePetSightings";
+import { useAuthStore } from "@/stores/auth";
+import { useToastStore } from "@/stores/toast";
 import { speciesLabel, sizeLabel, sexLabel } from "@/constants/enums";
 import { formatDate } from "@/utils/format-date";
 import { relativeTime } from "@/utils/relative-time";
@@ -14,6 +17,8 @@ import { NavHeader } from "@/components/ui/NavHeader";
 import { ButtonPrimary } from "@/components/ui/ButtonPrimary";
 import { PhotoCarousel } from "@/components/pet-report/PhotoCarousel";
 import { CharacteristicsSection } from "@/components/pet-report/CharacteristicsSection";
+import { ClaimContactDialog } from "@/components/sighting/ClaimContactDialog";
+import type { SightingOwner } from "@/types/pet-sighting";
 
 function parseId(raw: string | string[] | undefined): number | null {
   if (!raw || Array.isArray(raw)) return null;
@@ -33,6 +38,14 @@ export default function PetSightingDetail() {
     isError,
     refetch,
   } = usePetSightingDetail(parsedId);
+
+  const claim = useClaimSighting();
+  const showToast = useToastStore((s) => s.show);
+  const userId = useAuthStore((s) => s.user?.id);
+  const isOwnSighting = sighting?.userId === userId;
+
+  const [contactDialogVisible, setContactDialogVisible] = useState(false);
+  const [claimedOwner, setClaimedOwner] = useState<SightingOwner | null>(null);
 
   if (parsedId === null) {
     return (
@@ -217,12 +230,49 @@ export default function PetSightingDetail() {
         </ScrollView>
 
         {/* Bottom bar */}
-        <View
-          className="border-t border-border bg-surface px-4 py-3"
-          style={{ paddingBottom: 12 + insets.bottom }}
-        >
-          <ButtonPrimary label="É meu pet!" onPress={() => {}} />
-        </View>
+        {sighting && !isOwnSighting && (
+          <View
+            className="border-t border-border bg-surface px-4 py-3"
+            style={{ paddingBottom: 12 + insets.bottom }}
+          >
+            <ButtonPrimary
+              label="É meu pet!"
+              loading={claim.isPending}
+              onPress={() => {
+                if (!sighting?.id) return;
+                claim.mutate(sighting.id, {
+                  onSuccess: (data) => {
+                    setClaimedOwner(data.sightingOwner);
+                    setContactDialogVisible(true);
+                  },
+                  onError: (error) => {
+                    if (error.response?.status === 403) {
+                      showToast(
+                        "Você não pode clamar seu próprio avistamento",
+                        "error",
+                      );
+                      return;
+                    }
+                    if (error.response?.status === 404) {
+                      showToast("Avistamento não encontrado", "error");
+                      return;
+                    }
+                    showToast("Erro ao clamar avistamento", "error");
+                  },
+                });
+              }}
+            />
+          </View>
+        )}
+
+        <ClaimContactDialog
+          visible={contactDialogVisible}
+          onClose={() => {
+            setContactDialogVisible(false);
+            setClaimedOwner(null);
+          }}
+          owner={claimedOwner}
+        />
       </>
       )}
     </View>

@@ -3,6 +3,7 @@ import type {
   PetSighting,
   PetSightingMapFilters,
   PetSightingListFilters,
+  SightingClaimResponse,
 } from "@/types/pet-sighting";
 import type { PaginatedResponse, ResourceResponse } from "@/types/api";
 
@@ -29,4 +30,16 @@ export const petSightingsApi = {
 
   /** Excluir avistamento */
   delete: (id: number) => api.delete(`/pet-sightings/${id}`),
+
+  /** Listar avistamentos do usuário autenticado */
+  listMySightings: (page: number = 1) =>
+    api.get<PaginatedResponse<PetSighting>>("/pet-sightings/my", {
+      params: { page },
+    }),
+
+  /** Clamar avistamento — idempotente */
+  claim: (sightingId: number) =>
+    api.post<ResourceResponse<SightingClaimResponse>>(
+      `/pet-sightings/${sightingId}/claim`,
+    ),
 };

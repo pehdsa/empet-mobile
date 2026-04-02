@@ -7,10 +7,12 @@ import {
 } from "@tanstack/react-query";
 import { petSightingsApi } from "@/services/api/pet-sightings";
 import { queryKeys } from "@/constants/query-keys";
+import type { AxiosError } from "axios";
 import type {
   PetSighting,
   PetSightingMapFilters,
   PetSightingListFilters,
+  SightingClaimResponse,
 } from "@/types/pet-sighting";
 
 /** Avistamentos para o mapa (sem paginacao) */
@@ -77,6 +79,16 @@ export function useDeletePetSighting() {
     mutationFn: (id: number) => petSightingsApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.petSightings.all });
+    },
+  });
+}
+
+/** Clamar avistamento ("É meu pet!") */
+export function useClaimSighting() {
+  return useMutation<SightingClaimResponse, AxiosError, number>({
+    mutationFn: async (sightingId) => {
+      const response = await petSightingsApi.claim(sightingId);
+      return response.data.data;
     },
   });
 }
