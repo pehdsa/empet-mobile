@@ -11,7 +11,6 @@ import { colors } from "@/lib/colors";
 import { phoneMask } from "@/utils/phone-mask";
 import { Dialog } from "@/components/ui/Dialog";
 import { ButtonPrimary } from "@/components/ui/ButtonPrimary";
-import { ErrorMessage } from "@/components/ui/ErrorMessage";
 
 interface PhoneFormDialogProps {
   visible: boolean;
@@ -99,7 +98,7 @@ export function PhoneFormDialog({
               editable={!isSaving}
             />
           </View>
-          {error && <ErrorMessage message={error} />}
+          {error && <Text className="font-montserrat text-xs text-error">{error}</Text>}
         </View>
 
         {/* WhatsApp toggle */}

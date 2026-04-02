@@ -5,7 +5,6 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import { Calendar } from "lucide-react-native";
 import { colors } from "@/lib/colors";
-import { ErrorMessage } from "./ErrorMessage";
 import { formatDateTime } from "@/utils/format-date";
 
 interface DateTimePickerFieldProps {
@@ -82,7 +81,7 @@ export function DateTimePickerField({
         <Calendar size={20} color={colors.textTertiary} />
       </Pressable>
 
-      {error && <ErrorMessage message={error} />}
+      {error && <Text className="font-montserrat text-xs text-error">{error}</Text>}
 
       {show && Platform.OS === "ios" && (
         <DateTimePicker

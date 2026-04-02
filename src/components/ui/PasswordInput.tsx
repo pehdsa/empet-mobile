@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
 import { colors } from "@/lib/colors";
-import { ErrorMessage } from "./ErrorMessage";
 
 interface PasswordInputProps extends Omit<RNTextInputProps, "className" | "secureTextEntry"> {
   label?: string;
@@ -45,7 +44,7 @@ export const PasswordInput = React.forwardRef<RNTextInput, PasswordInputProps>(
             )}
           </Pressable>
         </View>
-        {error && <ErrorMessage message={error} />}
+        {error && <Text className="font-montserrat text-xs text-error">{error}</Text>}
       </View>
     );
   },

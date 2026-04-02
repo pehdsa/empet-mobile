@@ -1,7 +1,6 @@
 import { View, Text, Pressable } from "react-native";
 import { ChevronDown } from "lucide-react-native";
 import { colors } from "@/lib/colors";
-import { ErrorMessage } from "./ErrorMessage";
 
 interface SelectFieldProps {
   label?: string;
@@ -40,7 +39,7 @@ export function SelectField({
         </Text>
         <ChevronDown size={20} color={colors.textTertiary} />
       </Pressable>
-      {error && <ErrorMessage message={error} />}
+      {error && <Text className="font-montserrat text-xs text-error">{error}</Text>}
     </View>
   );
 }

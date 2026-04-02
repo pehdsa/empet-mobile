@@ -4,7 +4,6 @@ export { ButtonSecondary } from "./ButtonSecondary";
 export { TextInput } from "./TextInput";
 export { PasswordInput } from "./PasswordInput";
 export { SelectField } from "./SelectField";
-export { ErrorMessage } from "./ErrorMessage";
 export { SuccessMessage } from "./SuccessMessage";
 export { TextLink } from "./TextLink";
 export { NavHeader } from "./NavHeader";

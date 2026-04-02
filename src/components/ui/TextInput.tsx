@@ -6,7 +6,6 @@ import {
   type TextInputProps as RNTextInputProps,
 } from "react-native";
 import { colors } from "@/lib/colors";
-import { ErrorMessage } from "./ErrorMessage";
 
 interface TextInputProps extends Omit<RNTextInputProps, "className"> {
   label?: string;
@@ -29,7 +28,7 @@ export const TextInput = React.forwardRef<RNTextInput, TextInputProps>(
           }`}
           {...props}
         />
-        {error && <ErrorMessage message={error} />}
+        {error && <Text className="font-montserrat text-xs text-error">{error}</Text>}
       </View>
     );
   },
