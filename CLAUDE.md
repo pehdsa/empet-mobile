@@ -88,7 +88,7 @@ src/                    # Logica da aplicacao (alias @/)
 
 **Schemas:** Zod em `src/features/[feature]/schemas/`. Tipo inferido: `type XxxFormData = z.infer<typeof xxxSchema>`. Senha: min 8, 1 maiuscula, 1 numero, 1 especial. Confirmacao via `.refine()`.
 
-**Estilizacao:** NativeWind v4 + Tailwind 3.4. **Tailwind e a fonte unica de design tokens** — nao existe `colors.ts` nem `theme.ts`. Cor primaria: `#AD4FFF`. Fontes: Montserrat (400, 500, 600, 700). Feedback visual de toque: botoes usam `active:opacity-80`, links de texto usam `active:opacity-60`. `Screen` com `scroll=true` inclui `KeyboardAvoidingView` (iOS: `behavior="padding"`). Telas de form centralizam conteudo com `<View className="flex-1 justify-center">` abaixo do NavHeader.
+**Estilizacao:** NativeWind v4 + Tailwind 3.4. **Tailwind e a fonte unica de design tokens** — nao existe `colors.ts` nem `theme.ts`. Cor primaria: `#FFA001`. Fontes: Montserrat (400, 500, 600, 700). Feedback visual de toque: botoes usam `active:opacity-80`, links de texto usam `active:opacity-60`. `Screen` com `scroll=true` inclui `KeyboardAvoidingView` (iOS: `behavior="padding"`). Telas de form centralizam conteudo com `<View className="flex-1 justify-center">` abaixo do NavHeader.
 
 **Modais:** Sempre usar o componente base `src/components/ui/BottomSheetModal.tsx` (`@gorhom/bottom-sheet`). Props: `visible`, `onClose`, `title`, `children`. Suporta drag-to-dismiss, backdrop, sizing dinamico. `BottomSheetModalProvider` ja esta no `AppProviders`.
 
@@ -132,7 +132,8 @@ src/                    # Logica da aplicacao (alias @/)
 | 008 | Pets CRUD | Implementado |
 | 009 | Report lost + sighting | Pendente |
 | 010 | Matches | Pendente |
-| 011 | Settings + extras | Pendente |
-| 012 | Notificacoes + push | Pendente |
+| 011 | Menu (Settings) | Implementado |
+| 012 | Notificacoes + push | Parcial (etapas 1-3, falta push/deep links) |
+| 013 | Claim de avistamento | Implementado |
 
 Planos detalhados em `docs/plans/`.
