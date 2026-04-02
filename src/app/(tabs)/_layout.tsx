@@ -1,8 +1,11 @@
 import { Tabs } from "expo-router";
-import { Search, Eye, PawPrint, Bell, Settings } from "lucide-react-native";
+import { Search, Eye, PawPrint, Bell, Menu } from "lucide-react-native";
 import { colors } from "@/lib/colors";
+import { useUnreadCount } from "@/hooks/useNotifications";
 
 export default function TabsLayout() {
+  const { data: unreadCount = 0 } = useUnreadCount();
+
   return (
     <Tabs
       screenOptions={{
@@ -30,7 +33,9 @@ export default function TabsLayout() {
         name="pets"
         options={{
           title: "Meus Pets",
-          tabBarIcon: ({ color, size }) => <PawPrint size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <PawPrint size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -38,13 +43,21 @@ export default function TabsLayout() {
         options={{
           title: "Alertas",
           tabBarIcon: ({ color, size }) => <Bell size={size} color={color} />,
+          tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: colors.error,
+            fontSize: 10,
+            fontFamily: "Montserrat_600SemiBold",
+          },
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: "Config",
-          tabBarIcon: ({ color, size }) => <Settings size={size} color={color} />,
+          title: "Menu",
+          tabBarIcon: ({ color, size }) => (
+            <Menu size={size} color={color} />
+          ),
         }}
       />
     </Tabs>
