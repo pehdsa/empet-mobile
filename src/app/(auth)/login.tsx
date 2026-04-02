@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { View } from "react-native";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
@@ -10,7 +9,6 @@ import { TextInput } from "@/components/ui/TextInput";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { ButtonPrimary } from "@/components/ui/ButtonPrimary";
 import { TextLink } from "@/components/ui/TextLink";
-import { ErrorMessage } from "@/components/ui/ErrorMessage";
 import { useLogin } from "@/hooks/useAuth";
 import { useToastStore } from "@/stores/toast";
 import { mapApiErrors } from "@/utils/map-api-errors";
@@ -22,8 +20,7 @@ import {
 export default function Login() {
   const router = useRouter();
   const login = useLogin();
-  const toast = useToastStore();
-  const [formError, setFormError] = useState<string | null>(null);
+  const showToast = useToastStore((s) => s.show);
 
   const {
     control,
@@ -36,20 +33,20 @@ export default function Login() {
   });
 
   const onSubmit = (data: LoginFormData) => {
-    setFormError(null);
     login.mutate(data, {
       onError: (error) => {
         if (!isAxiosError(error)) {
-          setFormError("Ocorreu um erro, tente novamente");
+          showToast("Ocorreu um erro, tente novamente", "error");
           return;
         }
         const status = error.response?.status;
         if (status === 422) {
-          mapApiErrors(setError, error);
+          const unhandled = mapApiErrors(setError, error);
+          if (unhandled.length > 0) showToast(unhandled[0], "error");
         } else if (status === 429) {
-          toast.show("Muitas tentativas, tente novamente", "error");
+          showToast("Muitas tentativas, tente novamente", "error");
         } else {
-          setFormError("Credenciais invalidas");
+          showToast("Credenciais inválidas", "error");
         }
       },
     });
@@ -69,10 +66,7 @@ export default function Login() {
               label="Email"
               placeholder="seu@email.com"
               value={value}
-              onChangeText={(text) => {
-                setFormError(null);
-                onChange(text);
-              }}
+              onChangeText={onChange}
               onBlur={onBlur}
               error={errors.email?.message}
               keyboardType="email-address"
@@ -92,10 +86,7 @@ export default function Login() {
               label="Senha"
               placeholder="Sua senha"
               value={value}
-              onChangeText={(text) => {
-                setFormError(null);
-                onChange(text);
-              }}
+              onChangeText={onChange}
               onBlur={onBlur}
               error={errors.password?.message}
               autoCapitalize="none"
@@ -112,11 +103,9 @@ export default function Login() {
           />
         </View>
 
-        {formError && <ErrorMessage message={formError} />}
-
         <ButtonPrimary
           label="Entrar"
-          onPress={handleSubmit(onSubmit)}
+          onPress={handleSubmit(onSubmit, () => showToast("Preencha os campos obrigatórios", "error"))}
           loading={login.isPending}
           disabled={login.isPending}
         />

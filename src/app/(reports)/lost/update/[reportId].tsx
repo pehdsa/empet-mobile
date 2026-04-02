@@ -141,10 +141,11 @@ export default function UpdateReportScreen() {
         },
         onError: (err) => {
           if (err instanceof AxiosError && err.response?.status === 422) {
-            mapApiErrors(setError, err as AxiosError<ValidationError>, {
+            const unhandled = mapApiErrors(setError, err as AxiosError<ValidationError>, {
               address_hint: "addressHint",
               lost_at: "lostAt",
             });
+            if (unhandled.length > 0) showToast(unhandled[0], "error");
           } else {
             showToast("Erro ao atualizar report", "error");
           }
@@ -308,7 +309,7 @@ export default function UpdateReportScreen() {
             style={{ paddingBottom: 16 + insets.bottom }}
           >
             <Pressable
-              onPress={handleSubmit(onSubmit)}
+              onPress={handleSubmit(onSubmit, () => showToast("Preencha os campos obrigatórios", "error"))}
               disabled={updateReport.isPending}
               className={`h-12 items-center justify-center rounded-xl bg-primary active:opacity-80 ${
                 updateReport.isPending ? "opacity-50" : ""

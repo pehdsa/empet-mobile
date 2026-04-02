@@ -147,13 +147,14 @@ export default function NewPetSightingScreen() {
       },
       onError: (err) => {
         if (err instanceof AxiosError && err.response?.status === 422) {
-          mapApiErrors(setError, err as AxiosError<ValidationError>, {
+          const unhandled = mapApiErrors(setError, err as AxiosError<ValidationError>, {
             sighted_at: "sightedAt",
             breed_id: "breedId",
             address_hint: "addressHint",
             share_phone: "sharePhone",
             characteristic_ids: "characteristicIds",
           });
+          if (unhandled.length > 0) showToast(unhandled[0], "error");
         } else {
           showToast("Erro ao registrar avistamento", "error");
         }
@@ -182,7 +183,10 @@ export default function NewPetSightingScreen() {
             control={control}
             name="photos"
             render={({ field: { value, onChange }, fieldState: { error } }) => (
-              <View className="gap-1">
+              <View className="gap-1.5">
+                <Text className="font-montserrat-medium text-[13px] text-text-secondary">
+                  Fotos
+                </Text>
                 <PhotoUploader
                   photos={value}
                   onChange={onChange}
@@ -479,7 +483,7 @@ export default function NewPetSightingScreen() {
           style={{ paddingBottom: 16 + insets.bottom }}
         >
           <Pressable
-            onPress={handleSubmit(onSubmit)}
+            onPress={handleSubmit(onSubmit, () => showToast("Preencha os campos obrigatórios", "error"))}
             disabled={createSighting.isPending}
             className={`h-12 items-center justify-center rounded-xl bg-primary active:opacity-80 ${
               createSighting.isPending ? "opacity-50" : ""

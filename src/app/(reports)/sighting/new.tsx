@@ -129,6 +129,7 @@ export default function NewSightingScreen() {
       },
       {
         onSuccess: () => {
+
           router.replace({
             pathname: "/(reports)/sighting/success" as never,
             params: { reportId: String(reportId) },
@@ -136,11 +137,18 @@ export default function NewSightingScreen() {
         },
         onError: (err) => {
           if (err instanceof AxiosError && err.response?.status === 422) {
-            mapApiErrors(setError, err as AxiosError<ValidationError>, {
+            const unhandled = mapApiErrors(setError, err as AxiosError<ValidationError>, {
               address_hint: "addressHint",
               sighted_at: "sightedAt",
               share_phone: "sharePhone",
             });
+            if (unhandled.length > 0) showToast(unhandled[0], "error");
+          } else if (err instanceof AxiosError && err.response?.status === 403) {
+            showToast(
+              (err.response?.data as { message?: string })?.message ??
+                "Você não pode reportar avistamento do próprio pet",
+              "error",
+            );
           } else {
             showToast("Erro ao reportar avistamento", "error");
           }
@@ -276,7 +284,7 @@ export default function NewSightingScreen() {
             style={{ paddingBottom: 16 + insets.bottom }}
           >
             <Pressable
-              onPress={handleSubmit(onSubmit)}
+              onPress={handleSubmit(onSubmit, () => showToast("Preencha os campos obrigatórios", "error"))}
               disabled={createSighting.isPending}
               className={`h-12 items-center justify-center rounded-xl bg-primary active:opacity-80 ${
                 createSighting.isPending ? "opacity-50" : ""

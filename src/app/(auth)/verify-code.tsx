@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { View, Text } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
@@ -8,7 +8,6 @@ import { OTPInput, type SlotProps } from "input-otp-native";
 import { Screen } from "@/components/ui/Screen";
 import { NavHeader } from "@/components/ui/NavHeader";
 import { ButtonPrimary } from "@/components/ui/ButtonPrimary";
-import { ErrorMessage } from "@/components/ui/ErrorMessage";
 import { useVerifyResetCode } from "@/hooks/useAuth";
 import { useToastStore } from "@/stores/toast";
 import { mapApiErrors } from "@/utils/map-api-errors";
@@ -35,8 +34,7 @@ export default function VerifyCode() {
   const router = useRouter();
   const { email } = useLocalSearchParams<{ email: string }>();
   const verifyCode = useVerifyResetCode();
-  const toast = useToastStore();
-  const [formError, setFormError] = useState<string | null>(null);
+  const showToast = useToastStore((s) => s.show);
 
   const {
     control,
@@ -56,7 +54,6 @@ export default function VerifyCode() {
   }, [email, router]);
 
   const onSubmit = (data: VerifyCodeFormData) => {
-    setFormError(null);
     verifyCode.mutate(data, {
       onSuccess: (response) => {
         const { resetToken } = response.data;
@@ -67,16 +64,17 @@ export default function VerifyCode() {
       },
       onError: (error) => {
         if (!isAxiosError(error)) {
-          setFormError("Ocorreu um erro, tente novamente");
+          showToast("Ocorreu um erro, tente novamente", "error");
           return;
         }
         const status = error.response?.status;
         if (status === 422) {
-          mapApiErrors(setError, error);
+          const unhandled = mapApiErrors(setError, error);
+          if (unhandled.length > 0) showToast(unhandled[0], "error");
         } else if (status === 429) {
-          toast.show("Muitas tentativas, tente novamente", "error");
+          showToast("Muitas tentativas, tente novamente", "error");
         } else {
-          setFormError("Código inválido ou expirado");
+          showToast("Código inválido ou expirado", "error");
         }
       },
     });
@@ -101,10 +99,7 @@ export default function VerifyCode() {
               <OTPInput
                 maxLength={6}
                 value={value}
-                onChange={(text) => {
-                  setFormError(null);
-                  onChange(text);
-                }}
+                onChange={onChange}
                 textContentType="oneTimeCode"
                 render={({ slots }) => (
                   <View className="flex-row gap-2">
@@ -114,16 +109,18 @@ export default function VerifyCode() {
                   </View>
                 )}
               />
-              {errors.code && <ErrorMessage message={errors.code.message!} />}
+              {errors.code && (
+                <Text className="font-montserrat text-xs text-error">
+                  {errors.code.message}
+                </Text>
+              )}
             </View>
           )}
         />
 
-        {formError && <ErrorMessage message={formError} />}
-
         <ButtonPrimary
           label="Verificar"
-          onPress={handleSubmit(onSubmit)}
+          onPress={handleSubmit(onSubmit, () => showToast("Preencha os campos obrigatórios", "error"))}
           loading={verifyCode.isPending}
           disabled={verifyCode.isPending}
         />

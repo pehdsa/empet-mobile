@@ -1,11 +1,18 @@
-import { View } from "react-native";
+import {
+  View,
+  ScrollView,
+  Pressable,
+  Text,
+  ActivityIndicator,
+  Platform,
+  KeyboardAvoidingView,
+} from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { AxiosError } from "axios";
-import { Screen } from "@/components/ui/Screen";
 import { NavHeader } from "@/components/ui/NavHeader";
-import { ButtonPrimary } from "@/components/ui/ButtonPrimary";
 import { PetForm } from "@/components/pet/PetForm";
 import { petSchema, type PetFormValues } from "@/features/pets/schemas/pet.schema";
 import { buildCreatePetFormData } from "@/features/pets/utils/build-pet-form-data";
@@ -16,6 +23,7 @@ import type { ValidationError } from "@/types/api";
 
 export default function CreatePetScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const showToast = useToastStore((s) => s.show);
   const createPet = useCreatePet();
 
@@ -51,33 +59,61 @@ export default function CreatePetScreen() {
       onError: (error) => {
         const axiosError = error as AxiosError<ValidationError>;
         if (axiosError.response?.status === 422) {
-          mapApiErrors(form.setError, axiosError, {
+          const unhandled = mapApiErrors(form.setError, axiosError, {
             breed_id: "breedId",
             secondary_breed_id: "secondaryBreedId",
             breed_description: "breedDescription",
             primary_color: "primaryColor",
             characteristic_ids: "characteristicIds",
           });
+          if (unhandled.length > 0) showToast(unhandled[0], "error");
         } else {
           showToast("Erro ao cadastrar pet", "error");
         }
       },
     });
-  });
+  }, () => showToast("Preencha os campos obrigatórios", "error"));
 
   return (
-    <Screen scroll>
-      <NavHeader title="Cadastrar Pet" />
-
-      <PetForm form={form} mode="create" />
-
-      <View className="mt-6 pb-8">
-        <ButtonPrimary
-          label="Salvar"
-          onPress={handleSubmit}
-          loading={createPet.isPending}
-        />
+    <View className="flex-1 bg-background">
+      <View style={{ paddingTop: insets.top }} className="bg-background">
+        <NavHeader title="Cadastrar Pet" className="px-6" />
       </View>
-    </Screen>
+
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ padding: 24, gap: 20 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <PetForm form={form} mode="create" />
+          <View className="h-4" />
+        </ScrollView>
+
+        <View
+          className="border-t border-border bg-surface px-6 py-4"
+          style={{ paddingBottom: 16 + insets.bottom }}
+        >
+          <Pressable
+            onPress={handleSubmit}
+            disabled={createPet.isPending}
+            className={`h-12 items-center justify-center rounded-xl bg-primary active:opacity-80 ${
+              createPet.isPending ? "opacity-50" : ""
+            }`}
+          >
+            {createPet.isPending ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text className="font-montserrat-bold text-base text-text-inverse">
+                Salvar
+              </Text>
+            )}
+          </Pressable>
+        </View>
+      </KeyboardAvoidingView>
+    </View>
   );
 }

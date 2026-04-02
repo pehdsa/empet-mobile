@@ -126,16 +126,11 @@ export default function ReportLostScreen() {
         },
         onError: (err) => {
           if (err instanceof AxiosError && err.response?.status === 422) {
-            const apiErr = err as AxiosError<ValidationError>;
-            mapApiErrors(setError, apiErr, {
+            const unhandled = mapApiErrors(setError, err as AxiosError<ValidationError>, {
               address_hint: "addressHint",
               lost_at: "lostAt",
             });
-            const petIdError =
-              apiErr.response?.data?.errors?.pet_id?.[0];
-            if (petIdError) {
-              showToast(petIdError, "error");
-            }
+            if (unhandled.length > 0) showToast(unhandled[0], "error");
           } else {
             showToast("Erro ao reportar pet perdido", "error");
           }
@@ -255,7 +250,7 @@ export default function ReportLostScreen() {
             style={{ paddingBottom: 16 + insets.bottom }}
           >
             <Pressable
-              onPress={handleSubmit(onSubmit)}
+              onPress={handleSubmit(onSubmit, () => showToast("Preencha os campos obrigatórios", "error"))}
               disabled={createReport.isPending}
               className={`h-12 items-center justify-center rounded-xl active:opacity-80 ${
                 createReport.isPending ? "opacity-50" : ""

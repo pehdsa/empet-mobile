@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { View } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
@@ -8,7 +8,6 @@ import { Screen } from "@/components/ui/Screen";
 import { NavHeader } from "@/components/ui/NavHeader";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { ButtonPrimary } from "@/components/ui/ButtonPrimary";
-import { ErrorMessage } from "@/components/ui/ErrorMessage";
 import { useResetPassword } from "@/hooks/useAuth";
 import { useToastStore } from "@/stores/toast";
 import { mapApiErrors } from "@/utils/map-api-errors";
@@ -24,8 +23,7 @@ export default function ResetPassword() {
     resetToken: string;
   }>();
   const resetPassword = useResetPassword();
-  const toast = useToastStore();
-  const [formError, setFormError] = useState<string | null>(null);
+  const showToast = useToastStore((s) => s.show);
 
   const {
     control,
@@ -50,24 +48,24 @@ export default function ResetPassword() {
   }, [email, resetToken, router]);
 
   const onSubmit = (data: ResetPasswordFormData) => {
-    setFormError(null);
     resetPassword.mutate(data, {
       onSuccess: () => {
-        toast.show("Senha redefinida com sucesso", "success");
+        showToast("Senha redefinida com sucesso");
         router.replace("/(auth)/login");
       },
       onError: (error) => {
         if (!isAxiosError(error)) {
-          setFormError("Ocorreu um erro, tente novamente");
+          showToast("Ocorreu um erro, tente novamente", "error");
           return;
         }
         const status = error.response?.status;
         if (status === 422) {
-          mapApiErrors(setError, error);
+          const unhandled = mapApiErrors(setError, error);
+          if (unhandled.length > 0) showToast(unhandled[0], "error");
         } else if (status === 429) {
-          toast.show("Muitas tentativas, tente novamente", "error");
+          showToast("Muitas tentativas, tente novamente", "error");
         } else {
-          setFormError("Ocorreu um erro, tente novamente");
+          showToast("Ocorreu um erro, tente novamente", "error");
         }
       },
     });
@@ -87,12 +85,9 @@ export default function ResetPassword() {
             <PasswordInput
               ref={ref}
               label="Nova senha"
-              placeholder="Minimo 8 caracteres"
+              placeholder="Mínimo 8 caracteres"
               value={value}
-              onChangeText={(text) => {
-                setFormError(null);
-                onChange(text);
-              }}
+              onChangeText={onChange}
               onBlur={onBlur}
               error={errors.password?.message}
               autoCapitalize="none"
@@ -111,10 +106,7 @@ export default function ResetPassword() {
               label="Confirmar senha"
               placeholder="Repita a senha"
               value={value}
-              onChangeText={(text) => {
-                setFormError(null);
-                onChange(text);
-              }}
+              onChangeText={onChange}
               onBlur={onBlur}
               error={errors.password_confirmation?.message}
               autoCapitalize="none"
@@ -124,11 +116,9 @@ export default function ResetPassword() {
           )}
         />
 
-        {formError && <ErrorMessage message={formError} />}
-
         <ButtonPrimary
           label="Redefinir senha"
-          onPress={handleSubmit(onSubmit)}
+          onPress={handleSubmit(onSubmit, () => showToast("Preencha os campos obrigatórios", "error"))}
           loading={resetPassword.isPending}
           disabled={resetPassword.isPending}
         />

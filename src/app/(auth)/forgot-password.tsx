@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { View, Text } from "react-native";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
@@ -8,7 +7,6 @@ import { Screen } from "@/components/ui/Screen";
 import { NavHeader } from "@/components/ui/NavHeader";
 import { TextInput } from "@/components/ui/TextInput";
 import { ButtonPrimary } from "@/components/ui/ButtonPrimary";
-import { ErrorMessage } from "@/components/ui/ErrorMessage";
 import { useForgotPassword } from "@/hooks/useAuth";
 import { useToastStore } from "@/stores/toast";
 import { mapApiErrors } from "@/utils/map-api-errors";
@@ -20,8 +18,7 @@ import {
 export default function ForgotPassword() {
   const router = useRouter();
   const forgotPassword = useForgotPassword();
-  const toast = useToastStore();
-  const [formError, setFormError] = useState<string | null>(null);
+  const showToast = useToastStore((s) => s.show);
 
   const {
     control,
@@ -34,7 +31,6 @@ export default function ForgotPassword() {
   });
 
   const onSubmit = (data: ForgotPasswordFormData) => {
-    setFormError(null);
     forgotPassword.mutate(data, {
       onSuccess: () => {
         router.push({
@@ -44,16 +40,17 @@ export default function ForgotPassword() {
       },
       onError: (error) => {
         if (!isAxiosError(error)) {
-          setFormError("Ocorreu um erro, tente novamente");
+          showToast("Ocorreu um erro, tente novamente", "error");
           return;
         }
         const status = error.response?.status;
         if (status === 422) {
-          mapApiErrors(setError, error);
+          const unhandled = mapApiErrors(setError, error);
+          if (unhandled.length > 0) showToast(unhandled[0], "error");
         } else if (status === 429) {
-          toast.show("Muitas tentativas, tente novamente", "error");
+          showToast("Muitas tentativas, tente novamente", "error");
         } else {
-          setFormError("Ocorreu um erro, tente novamente");
+          showToast("Ocorreu um erro, tente novamente", "error");
         }
       },
     });
@@ -77,10 +74,7 @@ export default function ForgotPassword() {
               label="Email"
               placeholder="seu@email.com"
               value={value}
-              onChangeText={(text) => {
-                setFormError(null);
-                onChange(text);
-              }}
+              onChangeText={onChange}
               onBlur={onBlur}
               error={errors.email?.message}
               keyboardType="email-address"
@@ -91,11 +85,9 @@ export default function ForgotPassword() {
           )}
         />
 
-        {formError && <ErrorMessage message={formError} />}
-
         <ButtonPrimary
           label="Enviar código"
-          onPress={handleSubmit(onSubmit)}
+          onPress={handleSubmit(onSubmit, () => showToast("Preencha os campos obrigatórios", "error"))}
           loading={forgotPassword.isPending}
           disabled={forgotPassword.isPending}
         />
