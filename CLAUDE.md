@@ -92,6 +92,13 @@ src/                    # Logica da aplicacao (alias @/)
 
 **Modais:** Sempre usar o componente base `src/components/ui/BottomSheetModal.tsx` (`@gorhom/bottom-sheet`). Props: `visible`, `onClose`, `title`, `children`. Suporta drag-to-dismiss, backdrop, sizing dinamico. `BottomSheetModalProvider` ja esta no `AppProviders`.
 
+**Feedback e erros:** Dois niveis de feedback:
+- **Toast** (`useToastStore((s) => s.show)`) para mensagens gerais: sucesso, erros de negocio, erros 422 nao mapeados a campos. Renderizado via `ToastProvider` no `AppProviders` — nunca montar `<Toast />` manualmente em layouts.
+- **Texto vermelho inline** (`<Text className="font-montserrat text-xs text-error">`) abaixo do input para erros de validacao de campo. Nunca usar caixa/box para erros de campo.
+- Campos obrigatorios marcados com `*` no label (ex: `"Nome *"`). Excecao: telas de auth nao usam `*`, exceto "Criar Conta" (register).
+- `mapApiErrors()` retorna `string[]` com erros nao mapeados — sempre capturar e exibir via toast: `const unhandled = mapApiErrors(...); if (unhandled.length > 0) showToast(unhandled[0], "error");`
+- Validacao client-side (Zod) deve mostrar toast generico: `handleSubmit(onSubmit, () => showToast("Preencha os campos obrigatórios", "error"))`. Sempre passar o segundo callback no `handleSubmit`.
+
 ## Como criar uma nova feature
 
 1. Criar types em `src/types/` (se necessario)
