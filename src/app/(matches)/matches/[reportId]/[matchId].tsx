@@ -79,7 +79,7 @@ export default function MatchDetailScreen() {
   const pet = report.pet;
   const { sighting } = match;
   const isPending = match.status === "PENDING";
-  const { color: scoreColor, Icon: ScoreIcon, label: scoreLabel } = getScoreConfig(match.score);
+  const { color: scoreColor, Icon: ScoreIcon, label: scoreLabel } = getScoreConfig(match.finalScore);
 
   const petPhoto = pet.photos?.[0]?.url;
   const sightingPhoto = sighting.photos?.[0]?.url;

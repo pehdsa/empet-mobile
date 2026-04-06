@@ -8,6 +8,7 @@ import {
   Dog,
   Cat,
   AlertTriangle,
+  Sparkles,
 } from "lucide-react-native";
 import { colors } from "@/lib/colors";
 import { speciesLabel, sizeLabel } from "@/constants/enums";
@@ -51,7 +52,7 @@ export function MatchCard({
   onDismiss,
   onPress,
 }: MatchCardProps) {
-  const { color: scoreColor, Icon: ScoreIcon } = getScoreConfig(match.score);
+  const { color: scoreColor, Icon: ScoreIcon } = getScoreConfig(match.finalScore);
   const { sighting } = match;
   const isPending = match.status === "PENDING";
 
@@ -82,6 +83,14 @@ export function MatchCard({
           <Text className="font-montserrat text-[13px] text-text-secondary">
             {formatDistance(match.distanceMeters)} de distância
           </Text>
+          {match.aiStatus === "SUCCESS" && (
+            <View className="flex-row items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5">
+              <Sparkles size={11} color={colors.primary} />
+              <Text className="font-montserrat-medium text-[10px] text-primary">
+                Avaliado por IA
+              </Text>
+            </View>
+          )}
         </View>
         <ChevronRight size={20} color="#9B9C9D" />
       </View>
