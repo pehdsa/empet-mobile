@@ -4,7 +4,7 @@ import { queryKeys } from "@/constants/query-keys";
 import type { MatchStatus } from "@/types/match";
 
 /** Lista matches de um report, opcionalmente filtrados por status.
- *  O select normaliza score e distanceMeters de string → number
+ *  O select normaliza baseScore, finalScore e distanceMeters de string → number
  *  (API retorna decimal cast como string). */
 export function useMatches(reportId: number | null, status?: MatchStatus) {
   return useQuery({
@@ -14,7 +14,8 @@ export function useMatches(reportId: number | null, status?: MatchStatus) {
     select: (r) =>
       r.data.data.map((m) => ({
         ...m,
-        score: Number(m.score),
+        baseScore: Number(m.baseScore),
+        finalScore: Number(m.finalScore),
         distanceMeters: Number(m.distanceMeters),
       })),
   });
